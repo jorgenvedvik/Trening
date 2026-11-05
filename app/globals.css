@@ -218,3 +218,43 @@ tr:last-child td { border-bottom: 0; }
   .hide-sm { display: none; }
   .z { grid-template-columns: 62px 64px 1fr; font-size: 13px; }
 }
+
+/* Tidsestimat */
+.sub { font-size: 13px; color: var(--muted); margin-top: 1px; }
+.est { font-weight: 500; color: var(--ink-2); }
+.day-est { font-size: 12px; color: var(--ink-2); }
+.pace-line { font-size: 13px; color: var(--ink-2); margin: -4px 0 4px; font-weight: 500; }
+.step-now { color: var(--ink); font-weight: 600; }
+.step-tag { margin-left: 6px; font-size: 11px; padding: 1px 7px; }
+
+/* Benkrotasjon */
+.bench-cycle { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.bench-step { position: relative; border-top: 4px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+.bench-tung { border-top-color: var(--accent); }
+.bench-moderat { border-top-color: var(--z3); }
+.bench-lett { border-top-color: var(--calm); }
+.bench-next { box-shadow: 0 0 0 2px var(--accent) inset; }
+.bench-top { display: flex; justify-content: space-between; align-items: center; }
+.bench-n { font-family: var(--display); font-size: 30px; line-height: 1; color: var(--muted); }
+.bench-next .bench-n { color: var(--accent); }
+.card .bench-name { font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--ink); margin: 2px 0 0; }
+.bench-dose { font-weight: 600; font-size: 14px; }
+.bench-flag { margin-top: auto; padding-top: 6px; font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+.bench-tag-tung { background: var(--accent-soft); color: var(--accent); }
+.bench-tag-lett { background: var(--calm-soft); color: var(--calm); }
+.bench-tag-moderat { background: color-mix(in srgb, var(--z3) 22%, transparent); color: var(--warn); }
+.bench-upcoming { margin-top: 10px; }
+.bench-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.bench-list li { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); }
+.bench-today { box-shadow: 0 0 0 2px var(--accent) inset; }
+.bench-date { font-size: 12px; color: var(--muted); font-weight: 600; }
+.bench-pill { font-size: 13px; font-weight: 700; padding: 2px 8px; border-radius: 999px; align-self: flex-start; }
+
+.km-stats { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) {
+  .bench-cycle { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .km-stats { grid-template-columns: 1fr 1fr; row-gap: 10px; }
+  .bench-list { grid-template-columns: 1fr 1fr; }
+}

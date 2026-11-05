@@ -1,5 +1,18 @@
 import { getRuns, stravaConfigured } from "../lib/strava";
-import { plan, weekFor, todayPlan, daysToRace, phaseIndex, recentWeeks } from "../lib/plan";
+import {
+  plan,
+  weekFor,
+  todayPlan,
+  daysToRace,
+  phaseIndex,
+  recentWeeks,
+  estimateRun,
+  estimateThreshold,
+  fmtMin,
+  fmtPace,
+  benchFor,
+  upcomingPushDays,
+} from "../lib/plan";
 import {
   osloToday,
   addDays,
@@ -14,6 +27,23 @@ import {
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
 
 const fmtKm = (n) => (n == null ? "–" : n.toLocaleString("nb-NO", { maximumFractionDigits: 1 }));
+
+// Tidsestimat for en planlagt løpedag
+function runEstimate(d) {
+  if (!d?.run || !d.km) return null;
+  const e = estimateRun(d.run, d.km);
+  return {
+    mid: e.mid,
+    text: `≈ ${fmtMin(e.mid)}`,
+    sub: `${fmtPace(e.pace)}/km · ${fmtMin(e.low)}–${fmtMin(e.high)}`,
+  };
+}
+
+function strengthText(d) {
+  if (d.strength !== "push") return d.strengthLabel;
+  const b = benchFor(d.date);
+  return b ? `Push · ${b.short}` : d.strengthLabel;
+}
 
 export default async function Page() {
   const today = osloToday();
@@ -33,6 +63,12 @@ export default async function Page() {
   const todayWd = weekday(today);
   const raceDays = daysToRace(today);
   const curPhase = phaseIndex(today);
+  const thr = estimateThreshold();
+  const todayBench = tPlan ? benchFor(tPlan.date) : null;
+  const todayEst = runEstimate(tPlan);
+  const weekMin = week ? week.days.reduce((s, d) => s + (runEstimate(d)?.mid ?? 0), 0) : 0;
+  const pushList = upcomingPushDays(today, 8);
+  const nextBench = pushList[0]?.bench;
 
   return (
     <main className="wrap">
@@ -89,6 +125,10 @@ export default async function Page() {
               <dt>Langtur</dt>
               <dd>{week ? `${week.long} km` : "–"}</dd>
             </div>
+            <div>
+              <dt>Løpetid (est.)</dt>
+              <dd>{week ? fmtMin(weekMin) : "–"}</dd>
+            </div>
           </dl>
           {week?.note && <p className="muted small">{week.note}</p>}
         </article>
@@ -105,7 +145,12 @@ export default async function Page() {
                   <span className="dot dot-strength" />
                   <div>
                     <p className="label">Styrke etter jobb</p>
-                    <p className="value">{tPlan.strengthLabel}</p>
+                    <p className="value">{strengthText(tPlan)}</p>
+                    {todayBench && (
+                      <p className="sub">
+                        {todayBench.name} · {todayBench.dose}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="today-row">
@@ -114,7 +159,14 @@ export default async function Page() {
                     <p className="label">Løping{tPlan.run && tPlan.run !== "long" ? " på kvelden" : ""}</p>
                     <p className="value">
                       {tPlan.run ? `${tPlan.runLabel} ${fmtKm(tPlan.km)} km` : "Ingen løping"}
+                      {todayEst && <span className="est"> {todayEst.text}</span>}
                     </p>
+                    {todayEst && (
+                      <p className="sub">
+                        {todayEst.sub}
+                        {tPlan.run === "quality" && ` · terskel ${thr.step.label} ≈ ${fmtMin(thr.total)} (~${fmtKm(thr.km)} km)`}
+                      </p>
+                    )}
                   </div>
                 </div>
                 {tPlan.extra && (
@@ -156,11 +208,14 @@ export default async function Page() {
                   <p className="day-name">
                     {d.name.slice(0, 3)} <span>{shortDate(d.date)}</span>
                   </p>
-                  <p className="day-strength">{d.strengthLabel}</p>
+                  <p className="day-strength">{strengthText(d)}</p>
                   {d.run ? (
-                    <p className={`day-run ${d.run === "long" ? "day-long" : ""}`}>
-                      {d.runLabel} · {fmtKm(d.km)} km
-                    </p>
+                    <>
+                      <p className={`day-run ${d.run === "long" ? "day-long" : ""}`}>
+                        {d.runLabel} · {fmtKm(d.km)} km
+                      </p>
+                      <p className="day-est">{runEstimate(d).text}</p>
+                    </>
                   ) : (
                     <p className="day-run day-norun">—</p>
                   )}
@@ -172,6 +227,47 @@ export default async function Page() {
           </div>
         </section>
       )}
+
+      {/* ---------- Benkrotasjon ---------- */}
+      <section className="section">
+        <h2 className="section-title">Benkrotasjon</h2>
+        <div className="bench-cycle">
+          {plan.bench.cycle.map((b, i) => (
+            <article
+              key={b.key}
+              className={`card bench-step bench-${b.intensity} ${nextBench?.index === i ? "bench-next" : ""}`}
+            >
+              <div className="bench-top">
+                <span className="bench-n">{i + 1}</span>
+                <span className={`tag bench-tag-${b.intensity}`}>{b.intensity}</span>
+              </div>
+              <h3 className="bench-name">{b.name}</h3>
+              <p className="bench-dose">{b.dose}</p>
+              <p className="muted small">{b.cue}</p>
+              {nextBench?.index === i && (
+                <p className="bench-flag">
+                  {pushList[0].date === today ? "I dag" : `Neste: ${shortDate(pushList[0].date)}`}
+                </p>
+              )}
+            </article>
+          ))}
+        </div>
+        <div className="card bench-upcoming">
+          <p className="label">Kommende push-dager</p>
+          <ol className="bench-list">
+            {pushList.map((p) => (
+              <li key={p.date} className={p.date === today ? "bench-today" : ""}>
+                <span className="bench-date">
+                  {["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"][weekday(p.date) - 1]} {shortDate(p.date)}
+                </span>
+                <span className={`bench-pill bench-tag-${p.bench.intensity}`}>
+                  {p.bench.index + 1} · {p.bench.short}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
       {/* ---------- Ukesvolum ---------- */}
       <section className="section">
@@ -245,6 +341,16 @@ export default async function Page() {
             return (
               <article key={k} className="card">
                 <h3>{s.title}</h3>
+                {k !== "quality" && (
+                  <p className="pace-line">
+                    ~{fmtPace(plan.paces[k].sec)}/km i {plan.paces[k].label.toLowerCase()}
+                  </p>
+                )}
+                {k === "quality" && (
+                  <p className="pace-line">
+                    Drag ~{fmtPace(plan.paces.threshold.sec)}/km · inkl. {s.warmupMin} min opp og {s.cooldownMin} min ned
+                  </p>
+                )}
                 <ul className="points">
                   {s.points.map((p) => (
                     <li key={p}>{p}</li>
@@ -254,9 +360,19 @@ export default async function Page() {
                   <>
                     <p className="label mt">Progresjon</p>
                     <ol className="steps">
-                      {s.progression.map((p) => (
-                        <li key={p}>{p}</li>
-                      ))}
+                      {s.progression.map((p, i) => {
+                        const e = estimateThreshold(i);
+                        const cur = i === s.currentStep;
+                        return (
+                          <li key={p.label} className={cur ? "step-now" : ""}>
+                            {p.label}{" "}
+                            <span className="muted">
+                              · ≈ {fmtMin(e.total)}, ~{fmtKm(e.km)} km
+                            </span>
+                            {cur && <span className="tag step-tag">nå</span>}
+                          </li>
+                        );
+                      })}
                     </ol>
                     <p className="muted small">{s.progressionRule}</p>
                   </>
@@ -294,7 +410,12 @@ export default async function Page() {
                         <span className="slot-dose">{slot.dose}</span>
                       </p>
                       <p className="slot-opts">
-                        {slot.options.map((o, j) => (
+                        {slot.bench && nextBench ? (
+                          <span>
+                            {pushList[0].date === today ? "I dag" : "Neste"}: <strong>{nextBench.name}</strong> ·{" "}
+                            {nextBench.dose}
+                          </span>
+                        ) : slot.options.map((o, j) => (
                           <span key={o}>
                             {j > 0 && <span className="or"> / </span>}
                             {o}

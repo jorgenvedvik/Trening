@@ -3,60 +3,209 @@
     "name": "Jørgen",
     "maxHr": 194,
     "zones": [
-      { "zone": "Sone 1", "min": 116, "max": 141, "use": "Nedjogg, restitusjon" },
-      { "zone": "Sone 2", "min": 141, "max": 160, "use": "Rolige turer og langtur – tak 160" },
-      { "zone": "Sone 3", "min": 160, "max": 170, "use": "Gråsone – unngå på rolige dager" },
-      { "zone": "Sone 4", "min": 170, "max": 180, "use": "Terskel – sikt på 172–176" },
-      { "zone": "Sone 5", "min": 180, "max": 194, "use": "VO₂max – senere i oppkjøringen" }
+      {
+        "zone": "Sone 1",
+        "min": 116,
+        "max": 141,
+        "use": "Nedjogg, restitusjon"
+      },
+      {
+        "zone": "Sone 2",
+        "min": 141,
+        "max": 160,
+        "use": "Rolige turer og langtur – tak 160"
+      },
+      {
+        "zone": "Sone 3",
+        "min": 160,
+        "max": 170,
+        "use": "Gråsone – unngå på rolige dager"
+      },
+      {
+        "zone": "Sone 4",
+        "min": 170,
+        "max": 180,
+        "use": "Terskel – sikt på 172–176"
+      },
+      {
+        "zone": "Sone 5",
+        "min": 180,
+        "max": 194,
+        "use": "VO₂max – senere i oppkjøringen"
+      }
     ],
     "cadenceTarget": "170–180 spm"
   },
-
   "race": {
     "name": "Oslo Maraton",
     "date": "2027-09-18",
     "goal": "4:50",
     "note": "4:50 = 6:52/km. 10 km på 51:32 tilsier at dette er konservativt (estimat 4:10–4:20, ikke et løfte)."
   },
-
   "planStart": "2026-09-21",
-
   "weeks": [
-    { "start": "2026-09-21", "km": 24, "long": 12 },
-    { "start": "2026-09-28", "km": 26, "long": 13 },
-    { "start": "2026-10-05", "km": 28, "long": 13 },
-    { "start": "2026-10-12", "km": 20, "long": 10, "deload": true },
-    { "start": "2026-10-19", "km": 30, "long": 14 },
-    { "start": "2026-10-26", "km": 33, "long": 15 },
-    { "start": "2026-11-02", "km": 35, "long": 16 },
-    { "start": "2026-11-09", "km": 25, "long": 12, "deload": true },
-    { "start": "2026-11-16", "km": 36, "long": 16, "draft": true },
-    { "start": "2026-11-23", "km": 38, "long": 17, "draft": true },
-    { "start": "2026-11-30", "km": 40, "long": 18, "draft": true },
-    { "start": "2026-12-07", "km": 28, "long": 13, "deload": true, "draft": true },
-    { "start": "2026-12-14", "km": 40, "long": 18, "draft": true },
-    { "start": "2026-12-21", "km": 32, "long": 14, "draft": true, "note": "Juleuke – fleksibel" },
-    { "start": "2026-12-28", "km": 40, "long": 18, "draft": true }
+    {
+      "start": "2026-09-21",
+      "km": 24,
+      "long": 12
+    },
+    {
+      "start": "2026-09-28",
+      "km": 26,
+      "long": 13
+    },
+    {
+      "start": "2026-10-05",
+      "km": 28,
+      "long": 13
+    },
+    {
+      "start": "2026-10-12",
+      "km": 20,
+      "long": 10,
+      "deload": true
+    },
+    {
+      "start": "2026-10-19",
+      "km": 30,
+      "long": 14
+    },
+    {
+      "start": "2026-10-26",
+      "km": 33,
+      "long": 15
+    },
+    {
+      "start": "2026-11-02",
+      "km": 35,
+      "long": 16
+    },
+    {
+      "start": "2026-11-09",
+      "km": 25,
+      "long": 12,
+      "deload": true
+    },
+    {
+      "start": "2026-11-16",
+      "km": 36,
+      "long": 16,
+      "draft": true
+    },
+    {
+      "start": "2026-11-23",
+      "km": 38,
+      "long": 17,
+      "draft": true
+    },
+    {
+      "start": "2026-11-30",
+      "km": 40,
+      "long": 18,
+      "draft": true
+    },
+    {
+      "start": "2026-12-07",
+      "km": 28,
+      "long": 13,
+      "deload": true,
+      "draft": true
+    },
+    {
+      "start": "2026-12-14",
+      "km": 40,
+      "long": 18,
+      "draft": true
+    },
+    {
+      "start": "2026-12-21",
+      "km": 32,
+      "long": 14,
+      "draft": true,
+      "note": "Juleuke – fleksibel"
+    },
+    {
+      "start": "2026-12-28",
+      "km": 40,
+      "long": 18,
+      "draft": true
+    }
   ],
-
   "phases": [
-    { "label": "Nå–des 2026", "text": "Bygg frekvens, 35–40 km/uke" },
-    { "label": "Jan–mars 2027", "text": "Stabil base 40–50 km/uke, terskel inn fast" },
-    { "label": "April–juni 2027", "text": "50–60 km/uke, langtur 24–28 km, testløp halvmaraton" },
-    { "label": "Juli–aug 2027", "text": "Topp 60–70 km/uke, 3 langturer på 30–34 km" },
-    { "label": "Sept 2027", "text": "3 ukers nedtrapping → løp 18.9" }
+    {
+      "label": "Nå–des 2026",
+      "text": "Bygg frekvens, 35–40 km/uke"
+    },
+    {
+      "label": "Jan–mars 2027",
+      "text": "Stabil base 40–50 km/uke, terskel inn fast"
+    },
+    {
+      "label": "April–juni 2027",
+      "text": "50–60 km/uke, langtur 24–28 km, testløp halvmaraton"
+    },
+    {
+      "label": "Juli–aug 2027",
+      "text": "Topp 60–70 km/uke, 3 langturer på 30–34 km"
+    },
+    {
+      "label": "Sept 2027",
+      "text": "3 ukers nedtrapping → løp 18.9"
+    }
   ],
-
   "weekTemplate": [
-    { "day": 1, "name": "Mandag", "strength": "push", "run": "easy", "share": 0.42, "runLabel": "Rolig" },
-    { "day": 2, "name": "Tirsdag", "strength": "legs", "run": null },
-    { "day": 3, "name": "Onsdag", "strength": "pull", "run": null, "extra": "Trappetest om morgenen" },
-    { "day": 4, "name": "Torsdag", "strength": "push", "run": "quality", "share": 0.33, "runLabel": "Rolig eller terskel" },
-    { "day": 5, "name": "Fredag", "strength": "pull", "run": "easy", "share": 0.25, "runLabel": "Veldig rolig", "fromWeek": 5 },
-    { "day": 6, "name": "Lørdag", "strength": "light-pull", "run": "long", "runLabel": "Langtur" },
-    { "day": 7, "name": "Søndag", "strength": "rest", "run": null }
+    {
+      "day": 1,
+      "name": "Mandag",
+      "strength": "push",
+      "run": "easy",
+      "share": 0.42,
+      "runLabel": "Rolig"
+    },
+    {
+      "day": 2,
+      "name": "Tirsdag",
+      "strength": "legs",
+      "run": null
+    },
+    {
+      "day": 3,
+      "name": "Onsdag",
+      "strength": "pull",
+      "run": null,
+      "extra": "Trappetest om morgenen"
+    },
+    {
+      "day": 4,
+      "name": "Torsdag",
+      "strength": "push",
+      "run": "quality",
+      "share": 0.33,
+      "runLabel": "Rolig eller terskel"
+    },
+    {
+      "day": 5,
+      "name": "Fredag",
+      "strength": "pull",
+      "run": "easy",
+      "share": 0.25,
+      "runLabel": "Veldig rolig",
+      "fromWeek": 5
+    },
+    {
+      "day": 6,
+      "name": "Lørdag",
+      "strength": "light-pull",
+      "run": "long",
+      "runLabel": "Langtur"
+    },
+    {
+      "day": 7,
+      "name": "Søndag",
+      "strength": "rest",
+      "run": null
+    }
   ],
-
   "runSessions": {
     "easy": {
       "title": "Rolig tur",
@@ -71,15 +220,49 @@
     "quality": {
       "title": "Terskel (når det står på planen)",
       "points": [
-        "Oppvarming 15 min rolig, nedjogg i sone 1 (under 141)",
+        "Oppvarming 15 min rolig, nedjogg 10 min i sone 1 (under 141)",
         "Dragene i nedre sone 4: 172–176 – la pulsen styre, ikke farten",
         "Start draget rolig – pulsen henger etter de første minuttene",
         "Aldri over 180, ingen spurt",
         "Flatt underlag, f.eks. Valle/Helsfyr",
         "Ellers: rolig 5–6 km i sone 2"
       ],
-      "progression": ["5 × 5 min", "4 × 8 min", "3 × 10 min", "2 × 15 min", "20–25 min sammenhengende tempo"],
-      "progressionRule": "Gå ett steg videre når to økter på rad kjennes kontrollerte og trappetesten er grønn."
+      "progression": [
+        {
+          "label": "5 × 5 min",
+          "reps": 5,
+          "min": 5,
+          "pauseSec": 90
+        },
+        {
+          "label": "4 × 8 min",
+          "reps": 4,
+          "min": 8,
+          "pauseSec": 90
+        },
+        {
+          "label": "3 × 10 min",
+          "reps": 3,
+          "min": 10,
+          "pauseSec": 120
+        },
+        {
+          "label": "2 × 15 min",
+          "reps": 2,
+          "min": 15,
+          "pauseSec": 120
+        },
+        {
+          "label": "20–25 min sammenhengende tempo",
+          "reps": 1,
+          "min": 22,
+          "pauseSec": 0
+        }
+      ],
+      "progressionRule": "Gå ett steg videre når to økter på rad kjennes kontrollerte og trappetesten er grønn.",
+      "currentStep": 0,
+      "warmupMin": 15,
+      "cooldownMin": 10
     },
     "long": {
       "title": "Langtur",
@@ -92,19 +275,72 @@
       ]
     }
   },
-
   "strength": {
     "legs": {
       "title": "Legs",
       "subtitle": "Ukas eneste legday. Tung i oddetallsuker, moderat i partalls-/deloaduker. Alt hoftehengsel bor her.",
       "slots": [
-        { "purpose": "Reaktivt (først, mens du er fersk)", "options": ["Pogo hops", "Enbeins pogos"], "dose": "3×20, lav amplitude" },
-        { "purpose": "Tung quad", "options": ["Knebøy", "Hack squat", "Leg press"], "dose": "Tung: 4×5 · Moderat: 3×8–10" },
-        { "purpose": "Hoftehengsel", "options": ["RDL", "Markløft", "Hip thrust"], "dose": "3×6–8" },
-        { "purpose": "Eksentrisk enbein (kneforsikring)", "options": ["Slant-board enbeins knebøy", "Step-down", "Tung split squat"], "dose": "3×8, 3 sek ned" },
-        { "purpose": "Hofte / frontalplan", "options": ["Copenhagen plank", "Kabel-abduksjon", "Banded side-steps"], "dose": "2–3 sett" },
-        { "purpose": "Legg", "options": ["Bøyd kne (soleus)", "Strakt kne (gastroc)"], "dose": "3×15 hver, full ROM – begge" },
-        { "purpose": "Tibialis", "options": ["Tibialis raise", "Tib bar", "Hælgange"], "dose": "2×20" }
+        {
+          "purpose": "Reaktivt (først, mens du er fersk)",
+          "options": [
+            "Pogo hops",
+            "Enbeins pogos"
+          ],
+          "dose": "3×20, lav amplitude"
+        },
+        {
+          "purpose": "Tung quad",
+          "options": [
+            "Knebøy",
+            "Hack squat",
+            "Leg press"
+          ],
+          "dose": "Tung: 4×5 · Moderat: 3×8–10"
+        },
+        {
+          "purpose": "Hoftehengsel",
+          "options": [
+            "RDL",
+            "Markløft",
+            "Hip thrust"
+          ],
+          "dose": "3×6–8"
+        },
+        {
+          "purpose": "Eksentrisk enbein (kneforsikring)",
+          "options": [
+            "Slant-board enbeins knebøy",
+            "Step-down",
+            "Tung split squat"
+          ],
+          "dose": "3×8, 3 sek ned"
+        },
+        {
+          "purpose": "Hofte / frontalplan",
+          "options": [
+            "Copenhagen plank",
+            "Kabel-abduksjon",
+            "Banded side-steps"
+          ],
+          "dose": "2–3 sett"
+        },
+        {
+          "purpose": "Legg",
+          "options": [
+            "Bøyd kne (soleus)",
+            "Strakt kne (gastroc)"
+          ],
+          "dose": "3×15 hver, full ROM – begge"
+        },
+        {
+          "purpose": "Tibialis",
+          "options": [
+            "Tibialis raise",
+            "Tib bar",
+            "Hælgange"
+          ],
+          "dose": "2×20"
+        }
       ],
       "note": "Blir økta for lang: kutt legg til 2 sett – ikke det eksentriske enbeinsarbeidet."
     },
@@ -112,21 +348,92 @@
       "title": "Push",
       "subtitle": "Ren overkropp – ingen beinbelastning før kveldsturen.",
       "slots": [
-        { "purpose": "Horisontal press", "options": ["Benkpress", "Manualpress", "Maskinpress"], "dose": "3–4×6–10" },
-        { "purpose": "Vertikal press", "options": ["Skulderpress manual", "Maskin-skulderpress", "Landmine press"], "dose": "3×8–10" },
-        { "purpose": "Øvre bryst", "options": ["Skrå manualpress", "Skrå maskinpress", "Kabel-flyes lav→høy"], "dose": "3×10–12" },
-        { "purpose": "Sidedelts", "options": ["Sidehev manual", "Sidehev kabel", "Maskin-sidehev"], "dose": "3×12–15" },
-        { "purpose": "Triceps", "options": ["Pushdown", "Overhead kabel-ext", "Dips"], "dose": "3×10–12" }
+        {
+          "purpose": "Benk – roterende variant",
+          "bench": true,
+          "options": [
+            "Se benkrotasjonen"
+          ],
+          "dose": "Etter rotasjon"
+        },
+        {
+          "purpose": "Vertikal press",
+          "options": [
+            "Skulderpress manual",
+            "Maskin-skulderpress",
+            "Landmine press"
+          ],
+          "dose": "3×8–10"
+        },
+        {
+          "purpose": "Øvre bryst",
+          "options": [
+            "Skrå manualpress",
+            "Skrå maskinpress",
+            "Kabel-flyes lav→høy"
+          ],
+          "dose": "3×10–12"
+        },
+        {
+          "purpose": "Sidedelts",
+          "options": [
+            "Sidehev manual",
+            "Sidehev kabel",
+            "Maskin-sidehev"
+          ],
+          "dose": "3×12–15"
+        },
+        {
+          "purpose": "Triceps",
+          "options": [
+            "Pushdown",
+            "Overhead kabel-ext",
+            "Dips"
+          ],
+          "dose": "3×10–12"
+        }
       ]
     },
     "pull": {
       "title": "Pull (ren)",
       "subtitle": "Ingen markløft og ingen stående roing – det beskytter korsryggen og holder fredag fri for beina.",
       "slots": [
-        { "purpose": "Vertikal drag", "options": ["Nedtrekk", "Kroppshev", "Pullover"], "dose": "3–4×6–10" },
-        { "purpose": "Horisontal drag (understøttet)", "options": ["Brystunderstøttet roing", "Sittende kabelroing", "Enarms maskinroing"], "dose": "3×8–10" },
-        { "purpose": "Bakre delt", "options": ["Face pulls", "Revers fly", "Revers pec deck"], "dose": "3×12–15" },
-        { "purpose": "Biceps", "options": ["Manualcurl", "Kabelcurl", "Hammercurl"], "dose": "3×10–12" }
+        {
+          "purpose": "Vertikal drag",
+          "options": [
+            "Nedtrekk",
+            "Kroppshev",
+            "Pullover"
+          ],
+          "dose": "3–4×6–10"
+        },
+        {
+          "purpose": "Horisontal drag (understøttet)",
+          "options": [
+            "Brystunderstøttet roing",
+            "Sittende kabelroing",
+            "Enarms maskinroing"
+          ],
+          "dose": "3×8–10"
+        },
+        {
+          "purpose": "Bakre delt",
+          "options": [
+            "Face pulls",
+            "Revers fly",
+            "Revers pec deck"
+          ],
+          "dose": "3×12–15"
+        },
+        {
+          "purpose": "Biceps",
+          "options": [
+            "Manualcurl",
+            "Kabelcurl",
+            "Hammercurl"
+          ],
+          "dose": "3×10–12"
+        }
       ]
     },
     "light-pull": {
@@ -140,11 +447,82 @@
       "slots": []
     }
   },
-
   "checkpoints": [
-    { "title": "Trappetest onsdag morgen", "text": "24 t etter legday. 0–1/10 ned trappa = grønt. Ukas viktigste datapunkt." },
-    { "title": "Puls under 160", "text": "På alle rolige turer og langturen. Gråsonen frister fortsatt." },
-    { "title": "Kadens", "text": "Rolige turer ligger rundt 156–158. Mål 170–180 – jobb med det på hverdagsturene." },
-    { "title": "Stoppregel", "text": "Stivt/vondt kne som ikke har gitt seg etter 24 t → gjenta forrige ukes volum. Aldri to økningsuker etter en gul uke." }
-  ]
+    {
+      "title": "Trappetest onsdag morgen",
+      "text": "24 t etter legday. 0–1/10 ned trappa = grønt. Ukas viktigste datapunkt."
+    },
+    {
+      "title": "Puls under 160",
+      "text": "På alle rolige turer og langturen. Gråsonen frister fortsatt."
+    },
+    {
+      "title": "Kadens",
+      "text": "Rolige turer ligger rundt 156–158. Mål 170–180 – jobb med det på hverdagsturene."
+    },
+    {
+      "title": "Stoppregel",
+      "text": "Stivt/vondt kne som ikke har gitt seg etter 24 t → gjenta forrige ukes volum. Aldri to økningsuker etter en gul uke."
+    }
+  ],
+  "paces": {
+    "_note": "Sekunder per km. Røft anslag fra Strava-turene dine i okt–nov (rolige turer 6:20–6:50/km, terskeldrag 4:44–4:56/km).",
+    "easy": {
+      "sec": 400,
+      "low": 385,
+      "high": 415,
+      "label": "Sone 2"
+    },
+    "long": {
+      "sec": 405,
+      "low": 390,
+      "high": 420,
+      "label": "Sone 2, langtur"
+    },
+    "threshold": {
+      "sec": 295,
+      "label": "Nedre sone 4"
+    },
+    "recoveryJog": {
+      "sec": 480
+    }
+  },
+  "bench": {
+    "_note": "Roterer på hver push-dag (man + tor). anchorDate er push-dagen som starter steg 1. Endre anchorDate for å forskyve rotasjonen.",
+    "anchorDate": "2026-11-05",
+    "cycle": [
+      {
+        "key": "tng",
+        "name": "Tung touch-and-go",
+        "short": "Tung TnG",
+        "intensity": "tung",
+        "dose": "4×4–6 @ ~80–85 %",
+        "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause."
+      },
+      {
+        "key": "larsen",
+        "name": "Larsen-press",
+        "short": "Larsen",
+        "intensity": "lett",
+        "dose": "3×6–8 @ ~65–70 %",
+        "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon."
+      },
+      {
+        "key": "pause",
+        "name": "Tung pauserep",
+        "short": "Pauserep",
+        "intensity": "tung",
+        "dose": "4×3–5 @ ~78–82 %, 1–2 sek pause",
+        "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil."
+      },
+      {
+        "key": "floor",
+        "name": "Floor press",
+        "short": "Floor press",
+        "intensity": "moderat",
+        "dose": "4×5–6 @ ~75–80 % av benk",
+        "cue": "Albuene i gulvet, kort pause, press opp. Lockout-styrke."
+      }
+    ]
+  }
 }
