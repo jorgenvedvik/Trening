@@ -612,8 +612,8 @@ ol, ul { padding: 0; list-style: none; }
   .today { padding: 22px 20px; }
   .today-blocks { grid-template-columns: 1fr; }
   .km-now { font-size: 88px; }
-  .count span { display: none; }
-  .count b::after { content: " dager"; font-size: 13px; color: var(--muted); font-style: normal; font-weight: 600; font-stretch: 100%; font-family: var(--sans); }
+  .count { gap: 6px; }
+  .count span { font-size: 10px; line-height: 1.25; max-width: none; white-space: nowrap; }
   .rot { grid-template-columns: 1fr 1fr; gap: 6px; }
   .rot-step { padding: 14px 12px; }
   .rot-step:not(.rot-on) .rot-cue { display: none; }

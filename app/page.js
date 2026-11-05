@@ -100,7 +100,11 @@ export default async function Page() {
           <SectionNav items={NAV} />
           <div className="count" title={`${plan.race.name} ${plan.race.date}`}>
             <b>{raceDays}</b>
-            <span>dager til {plan.race.name}</span>
+            <span>
+              dager til
+              <br />
+              {plan.race.name}
+            </span>
           </div>
         </div>
       </header>
@@ -131,7 +135,15 @@ export default async function Page() {
                     {!doneToday && tEst && <span className="tb-time"> ≈ {fmtMin(tEst.mid)}</span>}
                   </p>
                   <p className="tb-s">
-                    {tPlan.run === "quality"
+                    {doneToday
+                      ? [
+                          formatDuration(todaysRuns.reduce((s, r) => s + r.movingTime, 0)),
+                          formatPace(todaysRuns.reduce((s, r) => s + r.movingTime, 0), doneTodayKm),
+                          todaysRuns[0]?.avgHr ? `snittpuls ${todaysRuns[0].avgHr}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : tPlan.run === "quality"
                       ? `eller terskel ${thr.step.label} ≈ ${fmtMin(thr.total)}`
                       : `${fmtPace(tEst.pace)}/km · sone 2 · under 160`}
                   </p>
