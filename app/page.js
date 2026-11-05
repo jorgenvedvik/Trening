@@ -5,534 +5,577 @@ import {
   todayPlan,
   daysToRace,
   phaseIndex,
-  recentWeeks,
   estimateRun,
   estimateThreshold,
   fmtMin,
   fmtPace,
   benchFor,
   upcomingPushDays,
+  seasonWeeks,
+  zoneOf,
 } from "../lib/plan";
-import {
-  osloToday,
-  addDays,
-  mondayOf,
-  weekday,
-  isoWeekNumber,
-  shortDate,
-  formatDuration,
-  formatPace,
-} from "../lib/time";
+import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
+import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
+import { coachLine, paceStatus } from "../lib/coach";
+import { CountUp, SectionNav } from "./ui";
 
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
 
-const fmtKm = (n) => (n == null ? "–" : n.toLocaleString("nb-NO", { maximumFractionDigits: 1 }));
+const RUN_ZONE = { easy: 2, long: 2, quality: 4 };
 
-// Tidsestimat for en planlagt løpedag
-function runEstimate(d) {
+const NAV = [
+  { id: "idag", label: "I dag" },
+  { id: "uka", label: "Uka" },
+  { id: "benk", label: "Benk" },
+  { id: "styrke", label: "Styrke" },
+  { id: "sesong", label: "Sesong" },
+  { id: "okter", label: "Øktene" },
+  { id: "turer", label: "Turer" },
+];
+
+function runEst(d) {
   if (!d?.run || !d.km) return null;
   const e = estimateRun(d.run, d.km);
-  return {
-    mid: e.mid,
-    text: `≈ ${fmtMin(e.mid)}`,
-    sub: `${fmtPace(e.pace)}/km · ${fmtMin(e.low)}–${fmtMin(e.high)}`,
-  };
+  return { mid: e.mid, low: e.low, high: e.high, pace: e.pace };
 }
 
 function strengthText(d) {
   if (d.strength !== "push") return d.strengthLabel;
   const b = benchFor(d.date);
-  return b ? `Push · ${b.short}` : d.strengthLabel;
+  return b ? `Push · ${b.name}` : d.strengthLabel;
 }
 
 export default async function Page() {
   const today = osloToday();
   const monday = mondayOf(today);
-  const since = addDays(monday, -7 * 7);
-  const { runs, source, updated, error } = await getRuns(since);
+  const { runs, source, updated, error } = await getRuns(addDays(monday, -7 * 7));
 
   const week = weekFor(today);
   const tPlan = todayPlan(today);
   const weekRuns = runs.filter((r) => r.date >= monday && r.date <= addDays(monday, 6));
   const weekKm = Math.round(weekRuns.reduce((s, r) => s + r.km, 0) * 10) / 10;
   const target = week?.km ?? null;
-  const pct = target ? Math.min(100, Math.round((weekKm / target) * 100)) : 0;
-  const remaining = target ? Math.max(0, Math.round((target - weekKm) * 10) / 10) : null;
-  const history = recentWeeks(today, runs, 8);
-  const maxBar = Math.max(...history.map((h) => Math.max(h.km, h.target ?? 0)), 10);
-  const todayWd = weekday(today);
+  const remaining = target ? Math.max(0, target - weekKm) : null;
+
+  const todaysRuns = runs.filter((r) => r.date === today);
+  const doneToday = todaysRuns.length > 0;
+  const doneTodayKm = todaysRuns.reduce((s, r) => s + r.km, 0);
+
+  // Forventet km så langt i uka (dager som er passert + i dag hvis løpt)
+  const expected = week
+    ? week.days.filter((d) => d.run && (d.date < today || (d.date === today && doneToday))).reduce((s, d) => s + d.km, 0)
+    : null;
+  const status = week ? paceStatus(weekKm - expected) : null;
+
+  const coach = coachLine({ tPlan, doneToday, doneTodayKm, week });
+  const tEst = runEst(tPlan);
+  const thr = estimateThreshold();
+  const tBench = tPlan ? benchFor(tPlan.date) : null;
+  const weekMin = week ? week.days.reduce((s, d) => s + (runEst(d)?.mid ?? 0), 0) : 0;
+  const runDays = week ? week.days.filter((d) => d.run) : [];
+  const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
+
+  const nextRun = week?.days.find((d) => d.run && (d.date > today || (d.date === today && !doneToday))) ?? null;
+  const pushList = upcomingPushDays(today, 8);
+  const nextBench = pushList[0];
+  const season = seasonWeeks(today, runs, 7, 4);
+  const seasonMax = Math.max(...season.map((s) => Math.max(s.km ?? 0, s.target ?? 0)), 10);
   const raceDays = daysToRace(today);
   const curPhase = phaseIndex(today);
-  const thr = estimateThreshold();
-  const todayBench = tPlan ? benchFor(tPlan.date) : null;
-  const todayEst = runEstimate(tPlan);
-  const weekMin = week ? week.days.reduce((s, d) => s + (runEstimate(d)?.mid ?? 0), 0) : 0;
-  const pushList = upcomingPushDays(today, 8);
-  const nextBench = pushList[0]?.bench;
+  const todayWd = weekday(today);
 
   return (
-    <main className="wrap">
-      {/* ---------- Topp ---------- */}
-      <header className="top">
-        <div>
-          <p className="eyebrow">
-            Uke {isoWeekNumber(today)} · {shortDate(monday)}–{shortDate(addDays(monday, 6))}
-          </p>
-          <h1>Løpeplanen</h1>
-        </div>
-        <div className="race">
-          <span className="race-num">{raceDays}</span>
-          <span className="race-label">
-            dager til {plan.race.name}
-            <br />
-            {shortDate(plan.race.date)} 2027 · mål {plan.race.goal}
-          </span>
+    <>
+      {/* ---------- Topplinje ---------- */}
+      <header className="bar">
+        <div className="bar-in">
+          <a href="#idag" className="logo" aria-label="PULS – til toppen">
+            <span className="logo-mark" aria-hidden>
+              <i />
+              <i />
+              <i />
+            </span>
+            PULS
+          </a>
+          <SectionNav items={NAV} />
+          <div className="count" title={`${plan.race.name} ${plan.race.date}`}>
+            <b>{raceDays}</b>
+            <span>dager til {plan.race.name}</span>
+          </div>
         </div>
       </header>
 
-      {/* ---------- Hero: km denne uka + i dag ---------- */}
-      <section className="hero">
-        <article className="card km-card">
-          <div className="card-head">
-            <h2>Km denne uka</h2>
-            {week && (
-              <span className={`tag ${week.deload ? "tag-calm" : ""}`}>
-                Planuke {week.number}
-                {week.deload ? " · deload" : ""}
-                {week.draft ? " · foreløpig" : ""}
-              </span>
-            )}
-          </div>
-          <div className="km-big">
-            <span className="km-now">{fmtKm(weekKm)}</span>
-            <span className="km-target">/ {fmtKm(target)} km</span>
-          </div>
-          <div className="bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-            <div className="bar-fill" style={{ width: `${pct}%` }} />
-          </div>
-          <dl className="km-stats">
-            <div>
-              <dt>Igjen</dt>
-              <dd>{fmtKm(remaining)} km</dd>
-            </div>
-            <div>
-              <dt>Turer</dt>
-              <dd>
-                {weekRuns.length} av {week ? week.days.filter((d) => d.run).length : "–"}
-              </dd>
-            </div>
-            <div>
-              <dt>Langtur</dt>
-              <dd>{week ? `${week.long} km` : "–"}</dd>
-            </div>
-            <div>
-              <dt>Løpetid (est.)</dt>
-              <dd>{week ? fmtMin(weekMin) : "–"}</dd>
-            </div>
-          </dl>
-          {week?.note && <p className="muted small">{week.note}</p>}
-        </article>
+      <main className="wrap">
+        {/* ---------- I dag ---------- */}
+        <section id="idag" className="hero anchor">
+          <article className="today rise" style={{ "--i": 0 }}>
+            <p className="eyebrow">
+              {DAY_LONG[todayWd - 1]} {shortDate(today)} · uke {isoWeekNumber(today)}
+            </p>
+            <h1 className="today-head">{coach.head}</h1>
+            <p className="today-body">{coach.body}</p>
 
-        <article className="card today-card">
-          <div className="card-head">
-            <h2>I dag</h2>
-            <span className="tag">{tPlan?.name ?? ""}</span>
-          </div>
-          {tPlan ? (
-            <>
-              <div className="today-rows">
-                <div className="today-row">
-                  <span className="dot dot-strength" />
-                  <div>
-                    <p className="label">Styrke etter jobb</p>
-                    <p className="value">{strengthText(tPlan)}</p>
-                    {todayBench && (
-                      <p className="sub">
-                        {todayBench.dose}
-                      </p>
-                    )}
-                  </div>
+            <div className="today-blocks">
+              {tPlan && (
+                <div className="tb">
+                  <p className="tb-k">Styrke · etter jobb</p>
+                  <p className="tb-v">{tBench ? tBench.name : tPlan.strengthLabel}</p>
+                  <p className="tb-s">{tBench ? tBench.dose : " "}</p>
                 </div>
-                <div className="today-row">
-                  <span className={`dot ${tPlan.run ? "dot-run" : "dot-off"}`} />
-                  <div>
-                    <p className="label">Løping{tPlan.run && tPlan.run !== "long" ? " på kvelden" : ""}</p>
-                    <p className="value">
-                      {tPlan.run ? `${tPlan.runLabel} ${fmtKm(tPlan.km)} km` : "Ingen løping"}
-                      {todayEst && <span className="est"> {todayEst.text}</span>}
-                    </p>
-                    {todayEst && (
-                      <p className="sub">
-                        {todayEst.sub}
-                        {tPlan.run === "quality" && ` · terskel ${thr.step.label} ≈ ${fmtMin(thr.total)} (~${fmtKm(thr.km)} km)`}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {tPlan.extra && (
-                  <div className="today-row">
-                    <span className="dot dot-check" />
-                    <div>
-                      <p className="label">Husk</p>
-                      <p className="value">{tPlan.extra}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              {tPlan.run && (
-                <ul className="points">
-                  {plan.runSessions[tPlan.run].points.slice(0, 4).map((p) => (
-                    <li key={p}>{p}</li>
-                  ))}
-                </ul>
               )}
-            </>
-          ) : (
-            <p className="muted">Ingen planuke lagt inn for denne datoen ennå.</p>
-          )}
-        </article>
-      </section>
-
-      {/* ---------- Uka dag for dag ---------- */}
-      {week && (
-        <section className="section">
-          <h2 className="section-title">Uka dag for dag</h2>
-          <div className="week-grid">
-            {week.days.map((d) => {
-              const done = weekRuns.filter((r) => r.date === d.date);
-              const doneKm = done.reduce((s, r) => s + r.km, 0);
-              const isToday = d.day === todayWd;
-              const past = d.date < today;
-              return (
-                <div key={d.day} className={`day ${isToday ? "day-today" : ""} ${past ? "day-past" : ""}`}>
-                  <p className="day-name">
-                    {d.name.slice(0, 3)} <span>{shortDate(d.date)}</span>
+              {tPlan?.run ? (
+                <div className={`tb ${doneToday ? "tb-done" : ""}`}>
+                  <p className="tb-k">Løping · {tPlan.run === "long" ? "på dagtid" : "på kvelden"}</p>
+                  <p className="tb-v">
+                    {doneToday ? `✓ ${fmtKm(doneTodayKm)} km` : `${fmtKm(tPlan.km)} km`}
+                    {!doneToday && tEst && <span className="tb-time"> ≈ {fmtMin(tEst.mid)}</span>}
                   </p>
-                  <p className="day-strength">{strengthText(d)}</p>
-                  {d.run ? (
-                    <>
-                      <p className={`day-run ${d.run === "long" ? "day-long" : ""}`}>
-                        {d.runLabel} · {fmtKm(d.km)} km
-                      </p>
-                      <p className="day-est">{runEstimate(d).text}</p>
-                    </>
-                  ) : (
-                    <p className="day-run day-norun">—</p>
-                  )}
-                  {doneKm > 0 && <p className="day-done">✓ {fmtKm(Math.round(doneKm * 10) / 10)} km løpt</p>}
-                  {d.extra && <p className="day-extra">{d.extra}</p>}
+                  <p className="tb-s">
+                    {tPlan.run === "quality"
+                      ? `eller terskel ${thr.step.label} ≈ ${fmtMin(thr.total)}`
+                      : `${fmtPace(tEst.pace)}/km · sone 2 · under 160`}
+                  </p>
                 </div>
+              ) : (
+                <div className="tb tb-off">
+                  <p className="tb-k">Løping</p>
+                  <p className="tb-v">Fri</p>
+                  <p className="tb-s">{tPlan?.extra ?? "Beina hviler"}</p>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="km card rise" style={{ "--i": 1 }}>
+            <div className="km-top">
+              <p className="eyebrow">Km denne uka</p>
+              {week && (
+                <span className={`chip ${week.deload ? "chip-calm" : ""}`}>
+                  <span>
+                    Planuke {week.number}
+                    {week.deload ? " · deload" : ""}
+                  </span>
+                </span>
+              )}
+            </div>
+            <p className="km-num">
+              <span className="km-now">
+                <CountUp value={weekKm} />
+              </span>
+              <span className="km-of">/ {fmtKm(target)}</span>
+            </p>
+
+            {/* Segmentert fremdrift: én skrå blokk per løpedag, bredde = planlagte km */}
+            <div className="segs" aria-label={`${fmtKm(weekKm)} av ${fmtKm(target)} km`}>
+              {runDays.map((d, i) => {
+                const got = weekRuns.filter((r) => r.date === d.date).reduce((s, r) => s + r.km, 0);
+                const fill = Math.min(1, got / d.km);
+                return (
+                  <div key={d.day} className="seg" style={{ flexGrow: d.km, "--i": i }}>
+                    <div className="seg-track">
+                      <div className={`seg-fill ${d.date === today ? "seg-today" : ""}`} style={{ "--f": fill }} />
+                    </div>
+                    <span className="seg-lab">
+                      {DAY_SHORT[d.day - 1]} <em>{fmtKm(d.km)}</em>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <dl className="km-stats">
+              <div>
+                <dt>Igjen</dt>
+                <dd>{fmtKm(remaining)} km</dd>
+              </div>
+              <div>
+                <dt>Turer</dt>
+                <dd>
+                  {weekRuns.length}/{runDays.length}
+                </dd>
+              </div>
+              <div>
+                <dt>Løpetid</dt>
+                <dd>≈ {fmtMin(weekMin)}</dd>
+              </div>
+            </dl>
+            {status && <p className={`status status-${status.tone}`}>{status.text}</p>}
+            {nextRun && (
+              <p className="next">
+                <span className="eyebrow">{nextRun.date === today ? "I kveld" : "Neste tur"}</span>
+                <b>
+                  {nextRun.date === today ? "" : `${DAY_SHORT[nextRun.day - 1]} · `}
+                  {nextRun.runLabel} {fmtKm(nextRun.km)} km
+                </b>
+                <span>≈ {fmtMin(runEst(nextRun).mid)}</span>
+              </p>
+            )}
+          </article>
+        </section>
+
+        {/* ---------- Uka ---------- */}
+        {week && (
+          <section id="uka" className="sec anchor">
+            <div className="sec-head">
+              <h2>Uka</h2>
+              <p>
+                {shortDate(week.start)}–{shortDate(week.end)} · {target} km · langtur {week.long} km
+              </p>
+            </div>
+            <ol className="week">
+              {week.days.map((d, i) => {
+                const got = weekRuns.filter((r) => r.date === d.date).reduce((s, r) => s + r.km, 0);
+                const est = runEst(d);
+                const isToday = d.date === today;
+                const past = d.date < today;
+                const z = d.run ? RUN_ZONE[d.run] : null;
+                return (
+                  <li key={d.day} className={`day rise ${isToday ? "day-now" : ""} ${past ? "day-past" : ""}`} style={{ "--i": i + 2 }}>
+                    <div className="day-meta">
+                      <p className="day-name">{DAY_SHORT[d.day - 1]}</p>
+                      <p className="day-date">{shortDate(d.date)}</p>
+                    </div>
+                    <div className="day-gauge" aria-hidden>
+                      {d.km > 0 && <div className="g-plan" style={{ "--h": d.km / maxDayKm }} />}
+                      {got > 0 && <div className="g-done" style={{ "--h": got / maxDayKm, "--i": i }} />}
+                    </div>
+                    <div className="day-body">
+                      <p className="day-str">{strengthText(d)}</p>
+                      {d.run ? (
+                        <p className={`day-run z${z}`}>
+                          <span className="zdot" />
+                          {d.runLabel} {fmtKm(d.km)} km
+                          {est && <span className="day-est"> · ≈ {fmtMin(est.mid)}</span>}
+                        </p>
+                      ) : (
+                        <p className="day-run day-off">{d.extra ?? "Ingen løping"}</p>
+                      )}
+                      {got > 0 && <p className="day-done">✓ {fmtKm(got)} km løpt</p>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        )}
+
+        {/* ---------- Benkrotasjon ---------- */}
+        <section id="benk" className="sec anchor">
+          <div className="sec-head">
+            <h2>Benkrotasjon</h2>
+            <p>Fire varianter på rad, én per push-dag. Mandag og torsdag.</p>
+          </div>
+          <div className="bench card">
+            <ol className="rot">
+              {plan.bench.cycle.map((b, i) => (
+                <li key={b.key} className={`rot-step rot-${b.intensity} ${nextBench?.bench.index === i ? "rot-on" : ""}`}>
+                  <div className="rot-top">
+                    <span className="rot-n">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="rot-int">
+                      <span>{nextBench?.bench.index === i ? (nextBench.date === today ? "I dag" : "Neste") : b.intensity}</span>
+                    </span>
+                  </div>
+                  <p className="rot-name">{b.name}</p>
+                  <p className="rot-dose">{b.dose}</p>
+                  <p className="rot-cue">{b.cue}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="upc">
+              <p className="eyebrow">Neste push-dager</p>
+              <ol className="upc-list">
+                {pushList.map((p) => (
+                  <li key={p.date} className={`upc-i rot-${p.bench.intensity} ${p.date === today ? "upc-now" : ""}`}>
+                    <span className="upc-d">
+                      {DAY_SHORT[weekday(p.date) - 1]} {shortDate(p.date)}
+                    </span>
+                    <span className="upc-b">
+                      <i>{p.bench.index + 1}</i>
+                      {p.bench.name}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Styrke ---------- */}
+        <section id="styrke" className="sec anchor">
+          <div className="sec-head">
+            <h2>Styrke</h2>
+            <p>Én slot = ett formål. Velg det alternativet gymmen har ledig.</p>
+          </div>
+          <div className="str">
+            {["legs", "push", "pull"].map((k) => {
+              const s = plan.strength[k];
+              const isToday = tPlan && (tPlan.strength === k || (k === "pull" && tPlan.strength === "light-pull"));
+              const days = plan.weekTemplate.filter((d) => d.strength === k).map((d) => DAY_SHORT[d.day - 1]);
+              return (
+                <details key={k} className={`card str-c ${isToday ? "str-now" : ""}`} open={isToday || undefined}>
+                  <summary>
+                    <div>
+                      <p className="str-title">
+                        {k === "legs" && week ? `Legs · ${week.legsMode}` : s.title}
+                        {isToday && <span className="now-tag">I dag</span>}
+                      </p>
+                      <p className="str-sub">
+                        {days.join(" + ")} · {s.slots.length} slots
+                      </p>
+                    </div>
+                    <span className="chev" aria-hidden />
+                  </summary>
+                  <p className="str-note">{s.subtitle}</p>
+                  <ol className="slots">
+                    {s.slots.map((slot, i) => (
+                      <li key={slot.purpose}>
+                        <span className="slot-n">{i + 1}</span>
+                        <div>
+                          <p className="slot-p">{slot.purpose}</p>
+                          <p className="slot-o">
+                            {slot.bench && nextBench ? (
+                              <>
+                                <b>{nextBench.bench.name}</b> · {nextBench.date === today ? "i dag" : `neste ${shortDate(nextBench.date)}`}
+                              </>
+                            ) : (
+                              slot.options.join(" / ")
+                            )}
+                          </p>
+                        </div>
+                        <span className="slot-d">{slot.bench && nextBench ? nextBench.bench.dose : slot.dose}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {s.note && <p className="str-note">{s.note}</p>}
+                </details>
               );
             })}
           </div>
         </section>
-      )}
 
-      {/* ---------- Benkrotasjon ---------- */}
-      <section className="section">
-        <h2 className="section-title">Benkrotasjon</h2>
-        <div className="bench-cycle">
-          {plan.bench.cycle.map((b, i) => (
-            <article
-              key={b.key}
-              className={`card bench-step bench-${b.intensity} ${nextBench?.index === i ? "bench-next" : ""}`}
-            >
-              <div className="bench-top">
-                <span className="bench-n">{i + 1}</span>
-                <span className={`tag bench-tag-${b.intensity}`}>{b.intensity}</span>
-              </div>
-              <h3 className="bench-name">{b.name}</h3>
-              <p className="bench-dose">{b.dose}</p>
-              <p className="muted small">{b.cue}</p>
-              {nextBench?.index === i && (
-                <p className="bench-flag">
-                  {pushList[0].date === today ? "I dag" : `Neste: ${shortDate(pushList[0].date)}`}
-                </p>
-              )}
-            </article>
-          ))}
-        </div>
-        <div className="card bench-upcoming">
-          <p className="label">Kommende push-dager</p>
-          <ol className="bench-list">
-            {pushList.map((p) => (
-              <li key={p.date} className={p.date === today ? "bench-today" : ""}>
-                <span className="bench-date">
-                  {["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"][weekday(p.date) - 1]} {shortDate(p.date)}
-                </span>
-                <span className={`bench-pill bench-tag-${p.bench.intensity}`}>
-                  {p.bench.index + 1} · {p.bench.short}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ---------- Ukesvolum ---------- */}
-      <section className="section">
-        <h2 className="section-title">Siste 8 uker</h2>
-        <div className="card">
-          <div className="chart" aria-label="Ukentlige kilometer mot mål">
-            {history.map((h) => {
-              const hPct = (h.km / maxBar) * 100;
-              const tPct = h.target ? (h.target / maxBar) * 100 : null;
-              const hit = h.target && h.km >= h.target * 0.95;
-              return (
-                <div key={h.start} className="col" title={`${shortDate(h.start)}: ${h.km} km av ${h.target ?? "–"}`}>
-                  <div className="col-area">
-                    {tPct != null && <div className="col-target" style={{ bottom: `${tPct}%` }} />}
-                    <div
-                      className={`col-bar ${h.current ? "col-current" : hit ? "col-hit" : ""}`}
-                      style={{ height: `${hPct}%` }}
-                    />
-                  </div>
-                  <p className="col-val">{fmtKm(h.km)}</p>
-                  <p className="col-lab">{shortDate(h.start)}</p>
-                </div>
-              );
-            })}
+        {/* ---------- Sesong ---------- */}
+        <section id="sesong" className="sec anchor">
+          <div className="sec-head">
+            <h2>Sesongen</h2>
+            <p>Faktiske km mot ukesmålet – og ukene som kommer.</p>
           </div>
-          <p className="legend">
-            <span className="lg lg-bar" /> Løpt <span className="lg lg-hit" /> Mål nådd{" "}
-            <span className="lg lg-target" /> Ukesmål
-          </p>
-        </div>
-      </section>
+          <div className="card season">
+            <div className="chart">
+              {season.map((w, i) => {
+                const hit = w.target && w.km != null && w.km >= w.target * 0.95;
+                return (
+                  <div key={w.start} className={`col col-${w.state}`} title={`Uke fra ${shortDate(w.start)}: ${w.km ?? "–"} av ${w.target ?? "–"} km`}>
+                    <div className="col-area">
+                      {w.target && w.state === "future" && <div className="col-ghost" style={{ "--h": w.target / seasonMax }} />}
+                      {w.km != null && (
+                        <div className={`col-b ${w.state === "now" ? "col-bn" : hit ? "col-bh" : ""}`} style={{ "--h": w.km / seasonMax, "--i": i }} />
+                      )}
+                      {w.target && w.state !== "future" && <div className="col-t" style={{ "--h": w.target / seasonMax }} />}
+                    </div>
+                    <p className="col-v">{w.km != null ? fmtKm(w.km) : w.target ?? "–"}</p>
+                    <p className="col-l">
+                      {shortDate(w.start)}
+                      {w.deload && <i className="col-dl">D</i>}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="legend">
+              <span><i className="lg lg-h" /> Mål nådd</span>
+              <span><i className="lg lg-b" /> Under mål</span>
+              <span><i className="lg lg-n" /> Denne uka</span>
+              <span><i className="lg lg-g" /> Kommende mål</span>
+              <span><i className="lg-d">D</i> Deload</span>
+            </p>
 
-      {/* ---------- Ukesmål-tabell ---------- */}
-      <section className="section">
-        <h2 className="section-title">Ukesmål</h2>
-        <div className="card table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Uke</th>
-                <th>Fra</th>
-                <th className="num">Km</th>
-                <th className="num">Langtur</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {plan.weeks.map((w, i) => (
-                <tr key={w.start} className={w.start === monday ? "row-now" : w.start < monday ? "row-past" : ""}>
-                  <td>{i + 1}</td>
-                  <td className="nowrap">{shortDate(w.start)}</td>
-                  <td className="num">{w.km}</td>
-                  <td className="num">{w.long}</td>
-                  <td>
-                    {w.deload && <span className="tag tag-calm">deload</span>}{" "}
-                    {w.draft && <span className="tag tag-ghost">foreløpig</span>}
-                  </td>
-                </tr>
+            <ol className="phases">
+              {plan.phases.map((p, i) => (
+                <li key={p.label} className={i === curPhase ? "ph-now" : i < curPhase ? "ph-past" : ""}>
+                  <p className="ph-l">{p.label}</p>
+                  <p className="ph-t">{p.text}</p>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            </ol>
 
-      {/* ---------- Økter ---------- */}
-      <section className="section">
-        <h2 className="section-title">Løpeøktene</h2>
-        <div className="grid-3">
-          {["easy", "quality", "long"].map((k) => {
-            const s = plan.runSessions[k];
-            return (
-              <article key={k} className="card">
-                <h3>{s.title}</h3>
-                {k !== "quality" && (
-                  <p className="pace-line">
-                    ~{fmtPace(plan.paces[k].sec)}/km i {plan.paces[k].label.toLowerCase()}
-                  </p>
-                )}
-                {k === "quality" && (
-                  <p className="pace-line">
-                    Drag ~{fmtPace(plan.paces.threshold.sec)}/km · inkl. {s.warmupMin} min opp og {s.cooldownMin} min ned
-                  </p>
-                )}
-                <ul className="points">
-                  {s.points.map((p) => (
-                    <li key={p}>{p}</li>
+            <details className="tbl">
+              <summary>Alle ukesmål</summary>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Uke</th>
+                    <th>Fra</th>
+                    <th className="num">Km</th>
+                    <th className="num">Langtur</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {plan.weeks.map((w, i) => (
+                    <tr key={w.start} className={w.start === monday ? "tr-now" : w.start < monday ? "tr-past" : ""}>
+                      <td>{i + 1}</td>
+                      <td className="nowrap">{shortDate(w.start)}</td>
+                      <td className="num">{w.km}</td>
+                      <td className="num">{w.long}</td>
+                      <td className="tags">
+                        {w.deload && (
+                          <span className="chip chip-calm">
+                            <span>deload</span>
+                          </span>
+                        )}{" "}
+                        {w.draft && (
+                          <span className="chip chip-ghost">
+                            <span>foreløpig</span>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
                   ))}
-                </ul>
-                {s.progression && (
-                  <>
-                    <p className="label mt">Progresjon</p>
-                    <ol className="steps">
+                </tbody>
+              </table>
+            </details>
+          </div>
+        </section>
+
+        {/* ---------- Øktene + soner ---------- */}
+        <section id="okter" className="sec anchor">
+          <div className="sec-head">
+            <h2>Øktene</h2>
+            <p>Pulsen styrer. Farten er bare et resultat.</p>
+          </div>
+          <div className="sessions">
+            {["easy", "quality", "long"].map((k) => {
+              const s = plan.runSessions[k];
+              return (
+                <article key={k} className={`card ses z${RUN_ZONE[k]}`}>
+                  <p className="ses-z">
+                    <span className="zdot" />
+                    Sone {RUN_ZONE[k]}
+                  </p>
+                  <h3>{s.title.replace(" (når det står på planen)", "")}</h3>
+                  <p className="ses-pace">
+                    {k === "quality"
+                      ? `Drag ~${fmtPace(plan.paces.threshold.sec)}/km · ${s.warmupMin} min opp, ${s.cooldownMin} min ned`
+                      : `~${fmtPace(plan.paces[k].sec)}/km`}
+                  </p>
+                  <ul className="pts">
+                    {s.points.map((p) => (
+                      <li key={p}>{p}</li>
+                    ))}
+                  </ul>
+                  {s.progression && (
+                    <ol className="prog">
                       {s.progression.map((p, i) => {
                         const e = estimateThreshold(i);
-                        const cur = i === s.currentStep;
                         return (
-                          <li key={p.label} className={cur ? "step-now" : ""}>
-                            {p.label}{" "}
-                            <span className="muted">
-                              · ≈ {fmtMin(e.total)}, ~{fmtKm(e.km)} km
-                            </span>
-                            {cur && <span className="tag step-tag">nå</span>}
+                          <li key={p.label} className={i === s.currentStep ? "prog-now" : i < s.currentStep ? "prog-done" : ""}>
+                            <span className="prog-l">{p.label}</span>
+                            <span className="prog-t">≈ {fmtMin(e.total)}</span>
                           </li>
                         );
                       })}
                     </ol>
-                    <p className="muted small">{s.progressionRule}</p>
-                  </>
-                )}
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ---------- Styrke ---------- */}
-      <section className="section">
-        <h2 className="section-title">Styrkeplan</h2>
-        <div className="strength">
-          {["legs", "push", "pull"].map((k) => {
-            const s = plan.strength[k];
-            const open = tPlan && (tPlan.strength === k || (k === "pull" && tPlan.strength === "light-pull"));
-            return (
-              <details key={k} className="card details" open={open || undefined}>
-                <summary>
-                  <span>
-                    <strong>{k === "legs" && week ? `Legs (${week.legsMode} uke)` : s.title}</strong>
-                    <span className="muted small block">{s.subtitle}</span>
-                  </span>
-                  <span className="chev" aria-hidden>
-                    ▾
-                  </span>
-                </summary>
-                <ol className="slots">
-                  {s.slots.map((slot, i) => (
-                    <li key={slot.purpose}>
-                      <p className="slot-head">
-                        <span className="slot-n">{i + 1}</span>
-                        {slot.purpose}
-                        <span className="slot-dose">{slot.dose}</span>
-                      </p>
-                      <p className="slot-opts">
-                        {slot.bench && nextBench ? (
-                          <span>
-                            {pushList[0].date === today ? "I dag" : "Neste"}: <strong>{nextBench.name}</strong> ·{" "}
-                            {nextBench.dose}
-                          </span>
-                        ) : slot.options.map((o, j) => (
-                          <span key={o}>
-                            {j > 0 && <span className="or"> / </span>}
-                            {o}
-                          </span>
-                        ))}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-                {s.note && <p className="muted small">{s.note}</p>}
-              </details>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* ---------- Kontrollpunkter + soner ---------- */}
-      <section className="section grid-2">
-        <div>
-          <h2 className="section-title">Kontrollpunkter</h2>
-          <div className="card">
-            <ul className="checks">
-              {plan.checkpoints.map((c) => (
-                <li key={c.title}>
-                  <strong>{c.title}</strong>
-                  <span>{c.text}</span>
-                </li>
-              ))}
-            </ul>
+                  )}
+                </article>
+              );
+            })}
           </div>
-        </div>
-        <div>
-          <h2 className="section-title">Pulssoner · maks {plan.athlete.maxHr}</h2>
-          <div className="card">
-            <ul className="zones">
-              {plan.athlete.zones.map((z, i) => (
-                <li key={z.zone} className={`z z${i + 1}`}>
-                  <span className="z-name">{z.zone}</span>
-                  <span className="z-range">
-                    {z.min}–{z.max}
-                  </span>
-                  <span className="z-use">{z.use}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
 
-      {/* ---------- Veien mot maraton ---------- */}
-      <section className="section">
-        <h2 className="section-title">Veien mot {plan.race.name}</h2>
-        <ol className="phases">
-          {plan.phases.map((p, i) => (
-            <li key={p.label} className={i === curPhase ? "phase-now" : i < curPhase ? "phase-past" : ""}>
-              <p className="phase-label">{p.label}</p>
-              <p className="phase-text">{p.text}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="muted small">{plan.race.note}</p>
-      </section>
-
-      {/* ---------- Siste turer ---------- */}
-      <section className="section">
-        <h2 className="section-title">Siste løpeturer</h2>
-        <div className="card table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Dato</th>
-                <th>Tur</th>
-                <th className="num">Km</th>
-                <th className="num hide-sm">Tempo</th>
-                <th className="num hide-sm">Hm</th>
-                <th className="num">Kadens</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.slice(0, 10).map((r) => (
-                <tr key={`${r.date}-${r.name}`}>
-                  <td className="nowrap">{shortDate(r.date)}</td>
-                  <td>
-                    {r.name}
-                    <span className="muted small block">
-                      {formatDuration(r.movingTime)}
-                      {r.avgHr ? ` · ${r.avgHr} bpm` : ""}
+          <div className="rules">
+            <article className="card">
+              <p className="eyebrow">Pulssoner · maks {plan.athlete.maxHr}</p>
+              <div className="zbar" aria-hidden>
+                {plan.athlete.zones.map((z, i) => (
+                  <span key={z.zone} className={`zb z${i + 1}`} style={{ flexGrow: z.max - z.min }} />
+                ))}
+              </div>
+              <ul className="zones">
+                {plan.athlete.zones.map((z, i) => (
+                  <li key={z.zone} className={`z${i + 1}`}>
+                    <span className="zdot" />
+                    <b>{z.zone}</b>
+                    <span className="zr">
+                      {z.min}–{z.max}
                     </span>
-                  </td>
-                  <td className="num">{fmtKm(r.km)}</td>
-                  <td className="num hide-sm nowrap">{formatPace(r.movingTime, r.km)}</td>
-                  <td className="num hide-sm">{r.elevation}</td>
-                  <td className={`num ${r.cadence && r.cadence < 165 ? "warn" : ""}`}>{r.cadence ?? "–"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                    <span className="zu">{z.use}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+            <article className="card">
+              <p className="eyebrow">Fire regler</p>
+              <ol className="checks">
+                {plan.checkpoints.map((c, i) => (
+                  <li key={c.title}>
+                    <span className="ck-n">{i + 1}</span>
+                    <div>
+                      <b>{c.title}</b>
+                      <p>{c.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          </div>
+        </section>
 
-      <footer className="foot">
-        {source === "strava" ? (
+        {/* ---------- Turer ---------- */}
+        <section id="turer" className="sec anchor">
+          <div className="sec-head">
+            <h2>Siste turer</h2>
+            <p>Prikken viser sonen for snittpulsen. Kadens under 165 er markert.</p>
+          </div>
+          <ol className="runs card">
+            <li className="run run-h" aria-hidden>
+              <span>Dato</span>
+              <span>Tur</span>
+              <span className="r">Puls</span>
+              <span className="r">Kadens</span>
+              <span className="r">Km</span>
+            </li>
+            {runs.slice(0, 10).map((r) => {
+              const z = zoneOf(r.avgHr);
+              return (
+                <li key={`${r.date}-${r.name}`} className="run">
+                  <span className="run-d">{shortDate(r.date)}</span>
+                  <div className="run-n">
+                    <p>{r.name}</p>
+                    <span>
+                      {formatDuration(r.movingTime)} · {formatPace(r.movingTime, r.km)}
+                      {r.elevation ? ` · ${r.elevation} hm` : ""}
+                    </span>
+                  </div>
+                  <span className={`run-hr ${z ? `z${z}` : ""}`}>
+                    {z && <span className="zdot" />}
+                    {r.avgHr ?? "–"}
+                  </span>
+                  <span className={`run-c ${r.cadence && r.cadence < 165 ? "low" : ""}`}>{r.cadence ?? "–"}</span>
+                  <span className="run-km">
+                    {fmtKm(r.km)}
+                    <small> km</small>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        <footer className="foot">
+          {source === "strava" ? (
+            <p>
+              <span className="live" /> Live fra Strava · oppdateres hvert 10. min
+            </p>
+          ) : (
+            <p>
+              Viser lagrede data fra {updated}.{" "}
+              {stravaConfigured() ? <>Strava svarte ikke ({error}).</> : <a href="/api/strava/connect">Koble til Strava →</a>}
+            </p>
+          )}
           <p>
-            <span className="live" /> Live fra Strava · oppdateres hvert 10. min
+            {plan.race.name} {shortDate(plan.race.date)} 2027 · mål {plan.race.goal} · planen ligger i data/plan.json
           </p>
-        ) : (
-          <p>
-            Viser lagrede data fra {updated}.{" "}
-            {stravaConfigured() ? (
-              <>Strava svarte ikke ({error}).</>
-            ) : (
-              <a href="/api/strava/connect">Koble til Strava for live km →</a>
-            )}
-          </p>
-        )}
-        <p className="muted">Planen ligger i data/plan.json – be Claude oppdatere den.</p>
-      </footer>
-    </main>
+        </footer>
+      </main>
+    </>
   );
 }
