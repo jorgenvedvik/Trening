@@ -148,7 +148,7 @@ export default async function Page() {
                     <p className="value">{strengthText(tPlan)}</p>
                     {todayBench && (
                       <p className="sub">
-                        {todayBench.name} · {todayBench.dose}
+                        {todayBench.dose}
                       </p>
                     )}
                   </div>

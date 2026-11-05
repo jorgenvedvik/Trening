@@ -494,7 +494,7 @@
       {
         "key": "tng",
         "name": "Tung touch-and-go",
-        "short": "Tung TnG",
+        "short": "Tung touch-and-go",
         "intensity": "tung",
         "dose": "4×4–6 @ ~80–85 %",
         "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause."
@@ -502,7 +502,7 @@
       {
         "key": "larsen",
         "name": "Larsen-press",
-        "short": "Larsen",
+        "short": "Larsen-press",
         "intensity": "lett",
         "dose": "3×6–8 @ ~65–70 %",
         "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon."
@@ -510,7 +510,7 @@
       {
         "key": "pause",
         "name": "Tung pauserep",
-        "short": "Pauserep",
+        "short": "Tung pauserep",
         "intensity": "tung",
         "dose": "4×3–5 @ ~78–82 %, 1–2 sek pause",
         "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil."
