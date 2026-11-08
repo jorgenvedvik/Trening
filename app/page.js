@@ -629,7 +629,7 @@ export default async function Page() {
         <footer className="foot">
           {source === "strava" ? (
             <p>
-              <span className="live" /> Live fra Strava · oppdateres hvert 10. min
+              <span className="live" /> Live fra Strava
             </p>
           ) : (
             <p>
@@ -637,9 +637,6 @@ export default async function Page() {
               {stravaConfigured() ? <>Strava svarte ikke ({error}).</> : <a href="/api/strava/connect">Koble til Strava →</a>}
             </p>
           )}
-          <p>
-            {plan.race.name} {shortDate(plan.race.date)} 2027 · mål {plan.race.goal} · planen ligger i data/plan.json
-          </p>
         </footer>
       </main>
     </>
