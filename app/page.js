@@ -10,6 +10,8 @@ import {
   fmtMin,
   fmtPace,
   rotationFor,
+  strengthFor,
+  legsModeFor,
   rotationKeyFor,
   upcomingRotation,
   seasonWeeks,
@@ -222,7 +224,7 @@ export default async function Page() {
             <div className="today-blocks">
               {tPlan && (
                 <div className="tb">
-                  <p className="tb-k">Styrke · etter jobb</p>
+                  <p className="tb-k">Styrke{todayWd <= 5 ? " · etter jobb" : ""}</p>
                   <p className="tb-v">{tBench ? tBench.name : tPlan.strengthLabel}</p>
                   <p className="tb-s">{tBench ? tBench.dose : " "}</p>
                 </div>
@@ -379,7 +381,7 @@ export default async function Page() {
         <section id="rotasjon" className="sec anchor">
           <div className="sec-head">
             <h2>Rotasjon</h2>
-            <p>Fast rekkefølge, fire steg. Benk på push-dager (man + tor), pullups på pull-dager (ons + fre).</p>
+            <p>Fast rekkefølge, fire steg. Benk på push-dager, pullups på pull-dager – hver tredje dag.</p>
           </div>
           <div className="rots">
             {Object.keys(plan.rotations).map((k) => (
@@ -398,13 +400,16 @@ export default async function Page() {
             {["legs", "push", "pull"].map((k) => {
               const s = plan.strength[k];
               const isToday = tPlan && (tPlan.strength === k || (k === "pull" && tPlan.strength === "light-pull"));
-              const days = plan.weekTemplate.filter((d) => d.strength === k).map((d) => DAY_SHORT[d.day - 1]);
+              const nextDay = (() => {
+                for (let d = today, i = 0; i < 4; i++, d = addDays(d, 1)) if (strengthFor(d) === k) return d;
+              })();
+              const days = [nextDay === today ? "I dag" : `Neste ${DAY_SHORT[weekday(nextDay) - 1].toLowerCase()} ${shortDate(nextDay)}`];
               return (
                 <details key={k} className={`card str-c ${isToday ? "str-now" : ""}`} open={isToday || undefined}>
                   <summary>
                     <div>
                       <p className="str-title">
-                        {k === "legs" && week ? `Legs · ${week.legsMode}` : s.title}
+                        {k === "legs" ? `Legs · ${legsModeFor(nextDay)}` : s.title}
                         {isToday && <span className="now-tag">I dag</span>}
                       </p>
                       <p className="str-sub">

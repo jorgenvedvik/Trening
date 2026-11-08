@@ -157,7 +157,6 @@
     {
       "day": 1,
       "name": "Mandag",
-      "strength": "push",
       "run": "easy",
       "share": 0.42,
       "runLabel": "Rolig"
@@ -165,19 +164,16 @@
     {
       "day": 2,
       "name": "Tirsdag",
-      "strength": "legs",
       "run": null
     },
     {
       "day": 3,
       "name": "Onsdag",
-      "strength": "pull",
       "run": null
     },
     {
       "day": 4,
       "name": "Torsdag",
-      "strength": "push",
       "run": "quality",
       "share": 0.33,
       "runLabel": "Rolig eller terskel"
@@ -185,7 +181,6 @@
     {
       "day": 5,
       "name": "Fredag",
-      "strength": "pull",
       "run": "easy",
       "share": 0.25,
       "runLabel": "Veldig rolig",
@@ -194,14 +189,12 @@
     {
       "day": 6,
       "name": "Lørdag",
-      "strength": "rest",
       "run": "long",
       "runLabel": "Langtur"
     },
     {
       "day": 7,
       "name": "Søndag",
-      "strength": "rest",
       "run": null
     }
   ],
@@ -277,7 +270,7 @@
   "strength": {
     "legs": {
       "title": "Legs",
-      "subtitle": "Ukas eneste legday. Tung i oddetallsuker, moderat i partalls-/deloaduker. Alt hoftehengsel bor her.",
+      "subtitle": "Tung og moderat veksler. Moderat når legday lander dagen før eller samme dag som langturen, og i deload-uker. Alt hoftehengsel bor her.",
       "slots": [
         {
           "purpose": "Reaktivt (først, mens du er fersk)",
@@ -345,7 +338,7 @@
     },
     "push": {
       "title": "Push",
-      "subtitle": "Ren overkropp – ingen beinbelastning før kveldsturen.",
+      "subtitle": "Ren overkropp – ingen beinbelastning.",
       "slots": [
         {
           "purpose": "Benk – roterende variant",
@@ -433,11 +426,6 @@
           "dose": "3×10–12"
         }
       ]
-    },
-    "rest": {
-      "title": "Hvile",
-      "subtitle": "Full hvile. Det er her formen faktisk bygges.",
-      "slots": []
     }
   },
   "checkpoints": [
@@ -478,8 +466,8 @@
   },
   "rotations": {
     "bench": {
-      "_note": "Roterer på hver push-dag (man + tor). anchorDate = første dag med steg 1.",
-      "anchorDate": "2026-11-05",
+      "_note": "Roterer på hver push-dag. anchorDate = første push-dag i ny split, startIndex = steget den dagen.",
+      "anchorDate": "2026-11-09",
       "cycle": [
         {
           "key": "tng",
@@ -524,10 +512,11 @@
       ],
       "title": "Benk",
       "strength": "push",
-      "noun": "benkøkt"
+      "noun": "benkøkt",
+      "startIndex": 1
     },
     "pullup": {
-      "_note": "Roterer på hver pull-dag (ons + fre). Ons = tung, fre = volum. Alt med vekt, styrt med reps i reserve. Hver testEvery-runde byttes steg 1 med test. anchorDate = første dag med steg 1.",
+      "_note": "Roterer på hver pull-dag (hver 3. dag). Annenhver økt tung, annenhver volum. Alt med vekt, styrt med reps i reserve. Hver testEvery-runde byttes steg 1 med test. anchorDate = første dag med steg 1.",
       "title": "Pullups",
       "strength": "pull",
       "noun": "pullup-økt",
@@ -581,5 +570,14 @@
         "cue": "Fasiten. Dødt heng, haka over stanga. Logg maksen – den styrer de neste ukene."
       }
     }
+  },
+  "split": {
+    "_note": "Push → legs → pull på repeat, hver dag, uten fast ukedag. anchorDate er en push-dag. Legs er moderat når den lander fredag/lørdag (før/på langturen) eller i deload-uker, ellers veksler den tung/moderat.",
+    "anchorDate": "2026-11-09",
+    "sequence": [
+      "push",
+      "legs",
+      "pull"
+    ]
   }
 }
