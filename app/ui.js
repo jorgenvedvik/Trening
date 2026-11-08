@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { sunTimes } from "../lib/sun";
 
 const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
@@ -240,6 +241,54 @@ export function GoalConfetti({ weekStart, reached, km }) {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+const osloHM = (d) => d.toLocaleTimeString("nb-NO", { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit" });
+
+/** Liten sol/måne midt i toppen: når går sola ned i Oslo i dag (eller opp i morgen)? */
+export function SunChip() {
+  const [now, setNow] = useState(null);
+  useEffect(() => {
+    setNow(new Date());
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+  if (!now) return <div className="sun" aria-hidden />;
+
+  const today = sunTimes(now);
+  const up = today.rise && today.set && now >= today.rise && now < today.set;
+  let label, title, soon = false;
+  if (up) {
+    const min = Math.round((today.set - now) / 60000);
+    soon = min <= 90;
+    label = soon ? `Sola ned om ${min} min` : `Sola ned ${osloHM(today.set)}`;
+    title = `Solnedgang i Oslo kl. ${osloHM(today.set)}`;
+  } else {
+    const next = now < (today.rise ?? now) ? today.rise : sunTimes(new Date(now.getTime() + 864e5)).rise;
+    label = next ? `Sola opp ${osloHM(next)}` : "Mørketid";
+    title = next ? `Soloppgang i Oslo kl. ${osloHM(next)}` : "Sola står ikke opp i dag";
+  }
+
+  return (
+    <div className={`sun ${up ? "sun-day" : "sun-night"} ${soon ? "sun-soon" : ""}`} title={title}>
+      {up ? (
+        <svg className="sun-ic" viewBox="0 0 24 16" aria-hidden>
+          <g className="sun-disc">
+            <path d="M6.5 13a5.5 5.5 0 0 1 11 0Z" />
+            <path className="sun-rays" d="M12 2.2v2.4M4.6 5.6l1.7 1.7M19.4 5.6l-1.7 1.7M1.6 11.4h2.3M20.1 11.4h2.3" />
+          </g>
+          <path className="sun-hz" d="M1 14.5h22" />
+        </svg>
+      ) : (
+        <svg className="sun-ic" viewBox="0 0 24 16" aria-hidden>
+          <path className="moon" d="M12.5 1a7 7 0 1 0 7.4 9.4 5.6 5.6 0 0 1-7.4-9.4Z" />
+          <circle className="star" cx="19.6" cy="3" r="1" />
+          <circle className="star s2" cx="23" cy="6.4" r=".7" />
+        </svg>
+      )}
+      <span>{label}</span>
     </div>
   );
 }

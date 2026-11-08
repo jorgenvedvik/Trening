@@ -22,7 +22,8 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti } from "./ui";
+import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti, SunChip } from "./ui";
+import { routePath } from "../lib/route";
 import { getRestDays, storeConfigured } from "../lib/store";
 
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
@@ -170,6 +171,9 @@ export default async function Page() {
   const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
 
   const todayWd = weekday(today);
+  // Siste tur med rute tegnes bak km-tallet (endene klippet, bare tegneflate-koordinater)
+  const routeRun = runs.find((r) => r.polyline);
+  const route = routeRun ? routePath(routeRun.polyline, 320, 200) : null;
   // Uker man kan bla i: forrige, denne og fire fram
   const OFFSET_LABEL = { "-1": "Forrige uke", 0: "Denne uka", 1: "Neste uke" };
   const weekViews = [-1, 0, 1, 2, 3, 4]
@@ -213,6 +217,7 @@ export default async function Page() {
             <span className="lc" aria-hidden>t</span>
           </a>
           <SectionNav items={NAV} />
+          <SunChip />
           <div className="count" title={`${plan.race.name} ${plan.race.date}`}>
             <b>{raceDays}</b>
             <span>
@@ -278,6 +283,14 @@ export default async function Page() {
           </article>
 
           <article className="km card rise" style={{ "--i": 1 }}>
+            {route && (
+              <div className="route" title={`Siste tur: ${routeRun.name} · ${fmtKm(routeRun.km)} km`}>
+                <svg viewBox={`0 0 ${route.w} ${route.h}`} preserveAspectRatio="xMaxYMid meet" aria-hidden>
+                  <path className="route-line" d={route.d} pathLength="1" />
+                  <circle className="route-end" cx={route.end[0]} cy={route.end[1]} r="4" />
+                </svg>
+              </div>
+            )}
             <div className="km-top">
               <p className="eyebrow">Km denne uka</p>
               {week && (
