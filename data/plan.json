@@ -194,7 +194,7 @@
     {
       "day": 6,
       "name": "Lørdag",
-      "strength": "core",
+      "strength": "rest",
       "run": "long",
       "runLabel": "Langtur"
     },
@@ -437,11 +437,6 @@
     "rest": {
       "title": "Hvile",
       "subtitle": "Full hvile. Det er her formen faktisk bygges.",
-      "slots": []
-    },
-    "core": {
-      "title": "Evt. core / mobilitet",
-      "subtitle": "Valgfritt etter langturen: 10–15 min core, hofter og legg. Ingen pull – ryggen skal hvile til onsdag.",
       "slots": []
     }
   },
