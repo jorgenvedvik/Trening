@@ -172,8 +172,7 @@
       "day": 3,
       "name": "Onsdag",
       "strength": "pull",
-      "run": null,
-      "extra": "Trappetest om morgenen"
+      "run": null
     },
     {
       "day": 4,
@@ -259,7 +258,7 @@
           "pauseSec": 0
         }
       ],
-      "progressionRule": "Gå ett steg videre når to økter på rad kjennes kontrollerte og trappetesten er grønn.",
+      "progressionRule": "Gå ett steg videre når to økter på rad kjennes kontrollerte.",
       "currentStep": 0,
       "warmupMin": 15,
       "cooldownMin": 10
@@ -448,10 +447,6 @@
     }
   },
   "checkpoints": [
-    {
-      "title": "Trappetest onsdag morgen",
-      "text": "24 t etter legday. 0–1/10 ned trappa = grønt. Ukas viktigste datapunkt."
-    },
     {
       "title": "Puls under 160",
       "text": "På alle rolige turer og langturen. Gråsonen frister fortsatt."

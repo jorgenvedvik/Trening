@@ -540,7 +540,7 @@ export default async function Page() {
               </ul>
             </article>
             <article className="card">
-              <p className="eyebrow">Fire regler</p>
+              <p className="eyebrow">{["Null", "Én", "To", "Tre", "Fire", "Fem"][plan.checkpoints.length] ?? plan.checkpoints.length} regler</p>
               <ol className="checks">
                 {plan.checkpoints.map((c, i) => (
                   <li key={c.title}>
