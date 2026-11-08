@@ -349,9 +349,9 @@
       "slots": [
         {
           "purpose": "Benk – roterende variant",
-          "bench": true,
+          "rotation": "bench",
           "options": [
-            "Se benkrotasjonen"
+            "Se rotasjonen"
           ],
           "dose": "Etter rotasjon"
         },
@@ -395,16 +395,15 @@
     },
     "pull": {
       "title": "Pull (ren)",
-      "subtitle": "Ingen markløft og ingen stående roing – det beskytter korsryggen og holder fredag fri for beina.",
+      "subtitle": "Vektede pullups først, mens du er fersk. Ingen markløft og ingen stående roing – det beskytter korsryggen og holder fredag fri for beina.",
       "slots": [
         {
-          "purpose": "Vertikal drag",
+          "purpose": "Pullups – roterende variant",
+          "rotation": "pullup",
           "options": [
-            "Nedtrekk",
-            "Kroppshev",
-            "Pullover"
+            "Se rotasjonen"
           ],
-          "dose": "3–4×6–10"
+          "dose": "Etter rotasjon"
         },
         {
           "purpose": "Horisontal drag (understøttet)",
@@ -482,50 +481,100 @@
       "sec": 480
     }
   },
-  "bench": {
-    "_note": "Roterer på hver push-dag (man + tor). anchorDate er push-dagen som starter steg 1. Endre anchorDate for å forskyve rotasjonen.",
-    "anchorDate": "2026-11-05",
-    "cycle": [
-      {
-        "key": "tng",
-        "name": "Tung touch-and-go",
-        "short": "Tung touch-and-go",
-        "intensity": "tung",
-        "dose": "4×4–6 @ ~80–85 %",
-        "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause.",
-        "tag": "Touch-and-go",
-        "level": 3
-      },
-      {
-        "key": "larsen",
-        "name": "Larsen-press",
-        "short": "Larsen-press",
-        "intensity": "lett",
-        "dose": "3×6–8 @ ~65–70 %",
-        "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon.",
-        "tag": "Larsen",
-        "level": 1
-      },
-      {
-        "key": "pause",
-        "name": "Tung pauserep",
-        "short": "Tung pauserep",
-        "intensity": "tung",
-        "dose": "4×3–5 @ ~78–82 %, 1–2 sek pause",
-        "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil.",
-        "tag": "Pauserep",
-        "level": 3
-      },
-      {
-        "key": "floor",
-        "name": "Floor press",
-        "short": "Floor press",
-        "intensity": "moderat",
-        "dose": "4×5–6 @ ~75–80 % av benk",
-        "cue": "Albuene i gulvet, kort pause, press opp. Lockout-styrke.",
-        "tag": "Floor press",
-        "level": 2
-      }
-    ]
+  "rotations": {
+    "bench": {
+      "_note": "Roterer på hver push-dag (man + tor). anchorDate = første dag med steg 1.",
+      "anchorDate": "2026-11-05",
+      "cycle": [
+        {
+          "key": "tng",
+          "name": "Tung touch-and-go",
+          "short": "Tung touch-and-go",
+          "intensity": "tung",
+          "dose": "4×4–6 @ ~80–85 %",
+          "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause.",
+          "tag": "Touch-and-go",
+          "level": 3
+        },
+        {
+          "key": "larsen",
+          "name": "Larsen-press",
+          "short": "Larsen-press",
+          "intensity": "lett",
+          "dose": "3×6–8 @ ~65–70 %",
+          "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon.",
+          "tag": "Larsen",
+          "level": 1
+        },
+        {
+          "key": "pause",
+          "name": "Tung pauserep",
+          "short": "Tung pauserep",
+          "intensity": "tung",
+          "dose": "4×3–5 @ ~78–82 %, 1–2 sek pause",
+          "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil.",
+          "tag": "Pauserep",
+          "level": 3
+        },
+        {
+          "key": "floor",
+          "name": "Floor press",
+          "short": "Floor press",
+          "intensity": "moderat",
+          "dose": "4×5–6 @ ~75–80 % av benk",
+          "cue": "Albuene i gulvet, kort pause, press opp. Lockout-styrke.",
+          "tag": "Floor press",
+          "level": 2
+        }
+      ],
+      "title": "Benk",
+      "strength": "push",
+      "noun": "benkøkt"
+    },
+    "pullup": {
+      "_note": "Roterer på hver pull-dag (ons + fre). Alt med vekt, 2–6 reps, styrt med RPE. anchorDate = første dag med steg 1.",
+      "title": "Pullups",
+      "strength": "pull",
+      "noun": "pullup-økt",
+      "anchorDate": "2026-11-11",
+      "cycle": [
+        {
+          "key": "double",
+          "name": "Tung dobbel",
+          "tag": "Dobbel",
+          "intensity": "tung",
+          "level": 3,
+          "dose": "Opp til tung 2 @ RPE 9, så 3×2 med −5 kg",
+          "cue": "Dødt heng i bunn og haka over stanga på hver rep. Går dobbelen lettere enn RPE 9: +1,25–2,5 kg neste gang."
+        },
+        {
+          "key": "speed",
+          "name": "Fartsdag",
+          "tag": "Fart",
+          "intensity": "lett",
+          "level": 1,
+          "dose": "6×2 @ RPE 6",
+          "cue": "Lett belte, maks fart opp, kontrollert ned. Hver rep skal se lik ut."
+        },
+        {
+          "key": "pause",
+          "name": "Pauserep",
+          "tag": "Pauserep",
+          "intensity": "tung",
+          "level": 3,
+          "dose": "4×3 @ RPE 8, 2 sek dødt heng",
+          "cue": "Full stopp i bunn uten å miste spenningen i skuldrene. Bygger styrke der pullups oftest stopper."
+        },
+        {
+          "key": "volume",
+          "name": "Volumdag",
+          "tag": "Volum",
+          "intensity": "moderat",
+          "level": 2,
+          "dose": "4×5 @ RPE 8",
+          "cue": "Samme belte på alle sett. Klarer du 5 på alle: +1,25–2,5 kg neste gang."
+        }
+      ]
+    }
   }
 }

@@ -9,8 +9,9 @@ import {
   estimateThreshold,
   fmtMin,
   fmtPace,
-  benchFor,
-  upcomingPushDays,
+  rotationFor,
+  rotationKeyFor,
+  upcomingRotation,
   seasonWeeks,
   zoneOf,
 } from "../lib/plan";
@@ -26,7 +27,7 @@ const RUN_ZONE = { easy: 2, long: 2, quality: 4 };
 const NAV = [
   { id: "idag", label: "I dag" },
   { id: "uka", label: "Uka" },
-  { id: "benk", label: "Benk" },
+  { id: "rotasjon", label: "Rotasjon" },
   { id: "styrke", label: "Styrke" },
   { id: "sesong", label: "Sesong" },
   { id: "okter", label: "Øktene" },
@@ -52,10 +53,69 @@ function Level({ n, label }) {
   );
 }
 
+const STR_SHORT = { push: "Push", pull: "Pull" };
+
 function strengthText(d) {
-  if (d.strength !== "push") return d.strengthLabel;
-  const b = benchFor(d.date);
-  return b ? `Push · ${b.name}` : d.strengthLabel;
+  const r = rotationFor(rotationKeyFor(d.strength), d.date);
+  return r ? `${STR_SHORT[d.strength]} · ${r.name}` : d.strengthLabel;
+}
+
+/** Én rotasjon: neste økt → bane med fire steg → kalender. */
+function RotationBlock({ rkey, today }) {
+  const rot = plan.rotations[rkey];
+  const list = upcomingRotation(rkey, today, 7);
+  const next = list[0];
+  if (!next) return null;
+  const started = today >= rot.anchorDate;
+  return (
+    <div className="rot-block">
+      <h3 className="rot-h">{rot.title}</h3>
+      <div className="bk">
+        <article className="bk-next">
+          <p className="eyebrow">
+            {next.date === today
+              ? "I dag"
+              : `${started ? "Neste" : "Starter"} ${rot.noun} · ${DAY_LONG[weekday(next.date) - 1].toLowerCase()} ${shortDate(next.date)}`}
+          </p>
+          <h4 className="bk-name">{next.item.name}</h4>
+          <p className="bk-dose">{next.item.dose}</p>
+          <p className="bk-cue">{next.item.cue}</p>
+          <Level n={next.item.level} label={next.item.intensity} />
+          <span className="bk-num" aria-hidden>
+            {String(next.item.index + 1).padStart(2, "0")}
+          </span>
+        </article>
+        <div className="bk-side">
+          <div className="card bk-track-card">
+            <p className="eyebrow">Rotasjonen</p>
+            <ol className="bk-track">
+              {rot.cycle.map((c, i) => (
+                <li key={c.key} className={i === next.item.index ? "on" : ""}>
+                  <span className="bk-step">{i + 1}</span>
+                  <span className="bk-tag">{c.tag}</span>
+                  <Level n={c.level} />
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="card bk-cal">
+            <p className="eyebrow">Deretter</p>
+            <ol>
+              {list.slice(1, 7).map((p) => (
+                <li key={p.date}>
+                  <span className="bk-d">
+                    {DAY_SHORT[weekday(p.date) - 1]} {shortDate(p.date)}
+                  </span>
+                  <span className="bk-v">{p.item.name}</span>
+                  <Level n={p.item.level} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default async function Page() {
@@ -83,7 +143,7 @@ export default async function Page() {
   const coach = coachLine({ tPlan, doneToday, doneTodayKm, week });
   const tEst = runEst(tPlan);
   const thr = estimateThreshold();
-  const tBench = tPlan ? benchFor(tPlan.date) : null;
+  const tBench = tPlan ? rotationFor(rotationKeyFor(tPlan.strength), tPlan.date) : null;
   const weekMin = week ? week.days.reduce((s, d) => s + (runEst(d)?.mid ?? 0), 0) : 0;
   const runDays = week ? week.days.filter((d) => d.run) : [];
   const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
@@ -111,8 +171,7 @@ export default async function Page() {
     [...(week?.days ?? []), ...(nextWeek?.days ?? [])].find(
       (d) => d.run && (d.date > today || (d.date === today && !doneToday))
     ) ?? null;
-  const pushList = upcomingPushDays(today, 8);
-  const nextBench = pushList[0];
+  const nextRot = Object.fromEntries(Object.keys(plan.rotations).map((k) => [k, upcomingRotation(k, today, 1)[0]]));
   const season = seasonWeeks(today, runs, 7, 4);
   const seasonMax = Math.max(...season.map((s) => Math.max(s.km ?? 0, s.target ?? 0)), 10);
   const raceDays = daysToRace(today);
@@ -309,61 +368,17 @@ export default async function Page() {
           </section>
         )}
 
-        {/* ---------- Benkrotasjon ---------- */}
-        <section id="benk" className="sec anchor">
+        {/* ---------- Rotasjoner ---------- */}
+        <section id="rotasjon" className="sec anchor">
           <div className="sec-head">
-            <h2>Benk</h2>
-            <p>Fire varianter i fast rekkefølge – én per push-dag (man + tor).</p>
+            <h2>Rotasjon</h2>
+            <p>Fast rekkefølge, fire steg. Benk på push-dager (man + tor), pullups på pull-dager (ons + fre).</p>
           </div>
-          {nextBench && (
-            <div className="bk">
-              {/* 1. Det viktigste: neste benkøkt */}
-              <article className="bk-next">
-                <p className="eyebrow">
-                  {nextBench.date === today ? "I dag" : `Neste benkøkt · ${DAY_LONG[weekday(nextBench.date) - 1].toLowerCase()} ${shortDate(nextBench.date)}`}
-                </p>
-                <h3 className="bk-name">{nextBench.bench.name}</h3>
-                <p className="bk-dose">{nextBench.bench.dose}</p>
-                <p className="bk-cue">{nextBench.bench.cue}</p>
-                <Level n={nextBench.bench.level} label={nextBench.bench.intensity} />
-                <span className="bk-num" aria-hidden>
-                  {String(nextBench.bench.index + 1).padStart(2, "0")}
-                </span>
-              </article>
-
-              <div className="bk-side">
-                {/* 2. Hvor i rotasjonen: én bane, fire steg */}
-                <div className="card bk-track-card">
-                  <p className="eyebrow">Rotasjonen</p>
-                  <ol className="bk-track">
-                    {plan.bench.cycle.map((c, i) => (
-                      <li key={c.key} className={i === nextBench.bench.index ? "on" : ""}>
-                        <span className="bk-step">{i + 1}</span>
-                        <span className="bk-tag">{c.tag}</span>
-                        <Level n={c.level} />
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-
-                {/* 3. Kalenderen: bare dato → variant */}
-                <div className="card bk-cal">
-                  <p className="eyebrow">Deretter</p>
-                  <ol>
-                    {pushList.slice(1, 7).map((p) => (
-                      <li key={p.date}>
-                        <span className="bk-d">
-                          {DAY_SHORT[weekday(p.date) - 1]} {shortDate(p.date)}
-                        </span>
-                        <span className="bk-v">{p.bench.name}</span>
-                        <Level n={p.bench.level} />
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="rots">
+            {Object.keys(plan.rotations).map((k) => (
+              <RotationBlock key={k} rkey={k} today={today} />
+            ))}
+          </div>
         </section>
 
         {/* ---------- Styrke ---------- */}
@@ -399,16 +414,17 @@ export default async function Page() {
                         <div>
                           <p className="slot-p">{slot.purpose}</p>
                           <p className="slot-o">
-                            {slot.bench && nextBench ? (
+                            {slot.rotation && nextRot[slot.rotation] ? (
                               <>
-                                <b>{nextBench.bench.name}</b> · {nextBench.date === today ? "i dag" : `neste ${shortDate(nextBench.date)}`}
+                                <b>{nextRot[slot.rotation].item.name}</b> ·{" "}
+                                {nextRot[slot.rotation].date === today ? "i dag" : `neste ${shortDate(nextRot[slot.rotation].date)}`}
                               </>
                             ) : (
                               slot.options.join(" / ")
                             )}
                           </p>
                         </div>
-                        <span className="slot-d">{slot.bench && nextBench ? nextBench.bench.dose : slot.dose}</span>
+                        <span className="slot-d">{slot.rotation && nextRot[slot.rotation] ? nextRot[slot.rotation].item.dose : slot.dose}</span>
                       </li>
                     ))}
                   </ol>

@@ -73,7 +73,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
-h1, h2, h3, p, ol, ul, dl, dd { margin: 0; }
+h1, h2, h3, h4, p, ol, ul, dl, dd { margin: 0; }
 ol, ul { padding: 0; list-style: none; }
 
 .eyebrow {
@@ -670,3 +670,12 @@ ol, ul { padding: 0; list-style: none; }
   pointer-events: none; user-select: none;
 }
 @media (max-width: 900px) { .bk-num { display: none; } }
+
+/* ---------- Rotasjoner (flere blokker) ---------- */
+.rots { display: grid; gap: 32px; }
+.rot-h {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  font-family: var(--display); font-stretch: 75%; font-style: italic; font-weight: 900;
+  font-size: 24px; text-transform: uppercase; line-height: 1;
+}
+.rot-h::before { content: ""; width: 14px; height: 14px; background: var(--ink); transform: skewX(var(--slant)); border-radius: 2px; }
