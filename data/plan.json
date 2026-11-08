@@ -426,6 +426,11 @@
           "dose": "3×10–12"
         }
       ]
+    },
+    "rest": {
+      "title": "Hvile",
+      "subtitle": "",
+      "slots": []
     }
   },
   "checkpoints": [
