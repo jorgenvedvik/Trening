@@ -171,9 +171,9 @@ export default async function Page() {
   const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
 
   const todayWd = weekday(today);
-  // Siste tur med rute tegnes bak km-tallet (endene klippet, bare tegneflate-koordinater)
+  // Siste tur med rute tegnes bak dagens kort i stedet for fartsstripene (endene klippet, bare tegneflate-koordinater)
   const routeRun = runs.find((r) => r.polyline);
-  const route = routeRun ? routePath(routeRun.polyline, 320, 200) : null;
+  const route = routeRun ? routePath(routeRun.polyline, 360, 260) : null;
   // Uker man kan bla i: forrige, denne og fire fram
   const OFFSET_LABEL = { "-1": "Forrige uke", 0: "Denne uka", 1: "Neste uke" };
   const weekViews = [-1, 0, 1, 2, 3, 4]
@@ -233,7 +233,15 @@ export default async function Page() {
       <main className="wrap">
         {/* ---------- I dag ---------- */}
         <section id="idag" className="hero anchor">
-          <article className="today rise" style={{ "--i": 0 }}>
+          <article className={`today rise ${route ? "has-route" : ""}`} style={{ "--i": 0 }}>
+            {route && (
+              <div className="route" title={`Siste tur: ${routeRun.name} · ${fmtKm(routeRun.km)} km`}>
+                <svg viewBox={`0 0 ${route.w} ${route.h}`} preserveAspectRatio="xMaxYMid meet" aria-hidden>
+                  <path className="route-line" d={route.d} pathLength="1" />
+                  <circle className="route-end" cx={route.end[0]} cy={route.end[1]} r="5" />
+                </svg>
+              </div>
+            )}
             <p className="eyebrow">
               {DAY_LONG[todayWd - 1]} {shortDate(today)} · uke {isoWeekNumber(today)}
             </p>
@@ -283,14 +291,6 @@ export default async function Page() {
           </article>
 
           <article className="km card rise" style={{ "--i": 1 }}>
-            {route && (
-              <div className="route" title={`Siste tur: ${routeRun.name} · ${fmtKm(routeRun.km)} km`}>
-                <svg viewBox={`0 0 ${route.w} ${route.h}`} preserveAspectRatio="xMaxYMid meet" aria-hidden>
-                  <path className="route-line" d={route.d} pathLength="1" />
-                  <circle className="route-end" cx={route.end[0]} cy={route.end[1]} r="4" />
-                </svg>
-              </div>
-            )}
             <div className="km-top">
               <p className="eyebrow">Km denne uka</p>
               {week && (
