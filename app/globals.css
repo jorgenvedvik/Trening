@@ -641,3 +641,34 @@ ol, ul { padding: 0; list-style: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* ---------- Ukebytter ---------- */
+.wk-head { align-items: flex-end; }
+.wk-title p { margin-top: 6px; }
+.wk-nav { display: flex; align-items: center; gap: 10px; }
+.wk-btn {
+  width: 40px; height: 36px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 6px;
+  background: var(--surface-2); color: var(--ink);
+  font: 700 16px/1 var(--sans);
+  transform: skewX(var(--slant));
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.wk-btn:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.wk-btn:disabled { opacity: 0.3; cursor: default; }
+.wk-dots { display: flex; gap: 5px; }
+.wk-dot {
+  width: 10px; height: 10px; padding: 0; border: 0;
+  border-radius: 2px; background: var(--line);
+  transform: skewX(var(--slant)); cursor: pointer;
+  transition: width 0.3s var(--ease), background 0.2s var(--ease);
+}
+.wk-dot.on { width: 26px; background: var(--signal); }
+.wk-body { animation: wkin 0.35s var(--ease) both; }
+@keyframes wkin { from { opacity: 0; transform: translateX(10px); } }
+@media (max-width: 560px) {
+  .wk-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .wk-nav { justify-content: space-between; }
+}

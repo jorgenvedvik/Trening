@@ -62,3 +62,44 @@ export function SectionNav({ items }) {
     </nav>
   );
 }
+
+/** Bla mellom uker i ukevisningen. Innholdet for hver uke rendres på serveren. */
+export function WeekSwitch({ weeks, initial = 0 }) {
+  const [idx, setIdx] = useState(Math.max(0, initial));
+  const w = weeks[idx];
+  const go = (d) => setIdx((i) => Math.min(weeks.length - 1, Math.max(0, i + d)));
+  return (
+    <>
+      <div className="sec-head wk-head">
+        <div className="wk-title">
+          <h2>{w.label}</h2>
+          <p>{w.sub}</p>
+        </div>
+        <div className="wk-nav">
+          <button type="button" className="wk-btn" onClick={() => go(-1)} disabled={idx === 0} aria-label="Forrige uke">
+            ←
+          </button>
+          <div className="wk-dots" role="tablist" aria-label="Velg uke">
+            {weeks.map((x, i) => (
+              <button
+                key={x.key}
+                type="button"
+                role="tab"
+                aria-selected={i === idx}
+                className={`wk-dot ${i === idx ? "on" : ""}`}
+                onClick={() => setIdx(i)}
+                title={x.label}
+              />
+            ))}
+          </div>
+          <button type="button" className="wk-btn" onClick={() => go(1)} disabled={idx === weeks.length - 1} aria-label="Neste uke">
+            →
+          </button>
+        </div>
+      </div>
+      <div key={w.key} className="wk-body">
+        {w.content}
+      </div>
+    </>
+  );
+}

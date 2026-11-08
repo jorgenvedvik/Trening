@@ -17,7 +17,7 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav } from "./ui";
+import { CountUp, SectionNav, WeekSwitch } from "./ui";
 
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
 
@@ -75,14 +75,35 @@ export default async function Page() {
   const runDays = week ? week.days.filter((d) => d.run) : [];
   const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
 
-  const nextRun = week?.days.find((d) => d.run && (d.date > today || (d.date === today && !doneToday))) ?? null;
+  const todayWd = weekday(today);
+  // Uker man kan bla i: forrige, denne og fire fram
+  const OFFSET_LABEL = { "-1": "Forrige uke", 0: "Denne uka", 1: "Neste uke" };
+  const weekViews = [-1, 0, 1, 2, 3, 4]
+    .map((o) => ({ offset: o, week: weekFor(addDays(monday, 7 * o)) }))
+    .filter((v) => v.week)
+    .map((v) => ({
+      ...v,
+      label: OFFSET_LABEL[v.offset] ?? `Om ${v.offset} uker`,
+      maxKm: Math.max(
+        ...v.week.days.map((d) => d.km ?? 0),
+        ...runs.filter((r) => r.date >= v.week.start && r.date <= v.week.end).map((r) => r.km),
+        1
+      ),
+    }));
+  // På søndag er uka i praksis ferdig – vis neste uke først
+  const defaultOffset = todayWd === 7 && weekViews.some((v) => v.offset === 1) ? 1 : 0;
+
+  const nextWeek = weekFor(addDays(monday, 7));
+  const nextRun =
+    [...(week?.days ?? []), ...(nextWeek?.days ?? [])].find(
+      (d) => d.run && (d.date > today || (d.date === today && !doneToday))
+    ) ?? null;
   const pushList = upcomingPushDays(today, 8);
   const nextBench = pushList[0];
   const season = seasonWeeks(today, runs, 7, 4);
   const seasonMax = Math.max(...season.map((s) => Math.max(s.km ?? 0, s.target ?? 0)), 10);
   const raceDays = daysToRace(today);
   const curPhase = phaseIndex(today);
-  const todayWd = weekday(today);
 
   return (
     <>
@@ -216,7 +237,7 @@ export default async function Page() {
               <p className="next">
                 <span className="eyebrow">{nextRun.date === today ? "I kveld" : "Neste tur"}</span>
                 <b>
-                  {nextRun.date === today ? "" : `${DAY_SHORT[nextRun.day - 1]} · `}
+                  {nextRun.date === today ? "" : `${DAY_SHORT[nextRun.day - 1]}${nextRun.date > addDays(monday, 6) ? " " + shortDate(nextRun.date) : ""} · `}
                   {nextRun.runLabel} {fmtKm(nextRun.km)} km
                 </b>
                 <span>≈ {fmtMin(runEst(nextRun).mid)}</span>
@@ -225,49 +246,53 @@ export default async function Page() {
           </article>
         </section>
 
-        {/* ---------- Uka ---------- */}
-        {week && (
+        {/* ---------- Uka (bla mellom uker) ---------- */}
+        {weekViews.length > 0 && (
           <section id="uka" className="sec anchor">
-            <div className="sec-head">
-              <h2>Uka</h2>
-              <p>
-                {shortDate(week.start)}–{shortDate(week.end)} · {target} km · langtur {week.long} km
-              </p>
-            </div>
-            <ol className="week">
-              {week.days.map((d, i) => {
-                const got = weekRuns.filter((r) => r.date === d.date).reduce((s, r) => s + r.km, 0);
-                const est = runEst(d);
-                const isToday = d.date === today;
-                const past = d.date < today;
-                const z = d.run ? RUN_ZONE[d.run] : null;
-                return (
-                  <li key={d.day} className={`day rise ${isToday ? "day-now" : ""} ${past ? "day-past" : ""}`} style={{ "--i": i + 2 }}>
-                    <div className="day-meta">
-                      <p className="day-name">{DAY_SHORT[d.day - 1]}</p>
-                      <p className="day-date">{shortDate(d.date)}</p>
-                    </div>
-                    <div className="day-gauge" aria-hidden>
-                      {d.km > 0 && <div className="g-plan" style={{ "--h": d.km / maxDayKm }} />}
-                      {got > 0 && <div className="g-done" style={{ "--h": got / maxDayKm, "--i": i }} />}
-                    </div>
-                    <div className="day-body">
-                      <p className="day-str">{strengthText(d)}</p>
-                      {d.run ? (
-                        <p className={`day-run z${z}`}>
-                          <span className="zdot" />
-                          {d.runLabel} {fmtKm(d.km)} km
-                          {est && <span className="day-est"> · ≈ {fmtMin(est.mid)}</span>}
-                        </p>
-                      ) : (
-                        <p className="day-run day-off">{d.extra ?? "Ingen løping"}</p>
-                      )}
-                      {got > 0 && <p className="day-done">✓ {fmtKm(got)} km løpt</p>}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
+            <WeekSwitch
+              initial={weekViews.findIndex((v) => v.offset === defaultOffset)}
+              weeks={weekViews.map((v) => ({
+                key: v.week.start,
+                label: v.label,
+                sub: `${shortDate(v.week.start)}–${shortDate(v.week.end)} · ${v.week.km} km · langtur ${v.week.long} km${v.week.deload ? " · deload" : ""}${v.week.draft ? " · foreløpig" : ""}`,
+                content: (
+                  <ol className="week">
+                    {v.week.days.map((d, i) => {
+                      const got = runs.filter((r) => r.date === d.date).reduce((s, r) => s + r.km, 0);
+                      const est = runEst(d);
+                      const isToday = d.date === today;
+                      const past = d.date < today;
+                      const z = d.run ? RUN_ZONE[d.run] : null;
+                      return (
+                        <li key={d.day} className={`day rise ${isToday ? "day-now" : ""} ${past ? "day-past" : ""}`} style={{ "--i": i }}>
+                          <div className="day-meta">
+                            <p className="day-name">{DAY_SHORT[d.day - 1]}</p>
+                            <p className="day-date">{shortDate(d.date)}</p>
+                          </div>
+                          <div className="day-gauge" aria-hidden>
+                            {d.km > 0 && <div className="g-plan" style={{ "--h": d.km / v.maxKm }} />}
+                            {got > 0 && <div className="g-done" style={{ "--h": got / v.maxKm, "--i": i }} />}
+                          </div>
+                          <div className="day-body">
+                            <p className="day-str">{strengthText(d)}</p>
+                            {d.run ? (
+                              <p className={`day-run z${z}`}>
+                                <span className="zdot" />
+                                {d.runLabel} {fmtKm(d.km)} km
+                                {est && <span className="day-est"> · ≈ {fmtMin(est.mid)}</span>}
+                              </p>
+                            ) : (
+                              <p className="day-run day-off">{d.extra ?? "Ingen løping"}</p>
+                            )}
+                            {got > 0 && <p className="day-done">✓ {fmtKm(got)} km løpt</p>}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                ),
+              }))}
+            />
           </section>
         )}
 
