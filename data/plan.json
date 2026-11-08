@@ -577,13 +577,14 @@
     }
   },
   "split": {
-    "_note": "Push → legs → pull på repeat, hver dag, uten fast ukedag. anchorDate er en push-dag. Legs er moderat når den lander fredag/lørdag (før/på langturen) eller i deload-uker, ellers veksler den tung/moderat.",
+    "_note": "Push → legs → pull på repeat, hver dag, uten fast ukedag. anchorDate er en push-dag. Legs er moderat når den lander fredag/lørdag (før/på langturen) eller i deload-uker, ellers veksler den tung/moderat. restDays: hviledager lagt inn via chat (slås sammen med knappens lagring).",
     "anchorDate": "2026-11-09",
     "sequence": [
       "push",
       "legs",
       "pull"
-    ]
+    ],
+    "restDays": []
   },
   "auth": {
     "_note": "Hash (scrypt) av passordet for «Hvile i dag»-knappen. PLAN_PASSWORD i Vercel overstyrer denne.",

@@ -132,7 +132,7 @@ function RotationBlock({ rkey, today }) {
 
 export default async function Page() {
   const today = osloToday();
-  setRestDays(await getRestDays());
+  setRestDays([...(plan.split.restDays ?? []), ...(await getRestDays())]);
   const monday = mondayOf(today);
   const { runs, source, updated, error } = await getRuns(addDays(monday, -7 * 7));
 
