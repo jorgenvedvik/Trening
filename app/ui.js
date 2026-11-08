@@ -187,3 +187,59 @@ export function RestButton({ date, isRest, enabled }) {
     </form>
   );
 }
+
+/** Konfetti av skrå blokker – én gang per uke, første gang siden åpnes etter at ukesmålet er nådd. */
+export function GoalConfetti({ weekStart, reached, km }) {
+  const [pieces, setPieces] = useState(null);
+  useEffect(() => {
+    if (!reached) return;
+    const key = `split-goal-${weekStart}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      localStorage.setItem(key, "1");
+    } catch {
+      return; // uten lagring: heller ingen feiring enn feiring hver gang
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const colors = ["var(--signal)", "var(--volt)", "var(--ink)", "var(--signal)", "var(--volt)"];
+    setPieces(
+      Array.from({ length: 90 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        delay: Math.random() * 0.5,
+        dur: 1.6 + Math.random() * 1.4,
+        drift: (Math.random() - 0.5) * 220,
+        rot: (Math.random() - 0.5) * 720,
+        w: 6 + Math.random() * 8,
+        h: 10 + Math.random() * 14,
+        c: colors[i % colors.length],
+      }))
+    );
+    const t = setTimeout(() => setPieces(null), 3600);
+    return () => clearTimeout(t);
+  }, [reached, weekStart]);
+
+  if (!pieces) return null;
+  return (
+    <div className="confetti" aria-hidden>
+      <p className="confetti-msg">
+        <span>Ukesmålet er nådd · {km.toLocaleString("nb-NO", { maximumFractionDigits: 1 })} km</span>
+      </p>
+      {pieces.map((p) => (
+        <i
+          key={p.id}
+          style={{
+            left: `${p.x}%`,
+            width: p.w,
+            height: p.h,
+            background: p.c,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.dur}s`,
+            "--drift": `${p.drift}px`,
+            "--rot": `${p.rot}deg`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}

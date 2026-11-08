@@ -142,6 +142,7 @@ ol, ul { padding: 0; list-style: none; }
 /* split-ordmerket: Outfit Black, små bokstaver, tett sporing.
    Toppen av l og t er kappet i −12°, i-prikken er den skrå blokken som slår. */
 .logo {
+  position: relative;
   display: inline-flex;
   align-items: flex-end;
   text-decoration: none;
@@ -162,8 +163,27 @@ ol, ul { padding: 0; list-style: none; }
   border-radius: .02em;
   transform: skewX(var(--slant));
   transform-origin: bottom;
-  animation: beat 2.4s var(--ease-in-out) infinite;
+  /* Slår i snittpulsen fra siste tur: --beat = 60 / bpm sekunder */
+  animation: heartbeat var(--beat, 1s) cubic-bezier(0.33, 0, 0.2, 1) infinite;
 }
+@keyframes heartbeat {
+  0% { scale: 1 1; }
+  12% { scale: 1 1.2; }
+  24% { scale: 1 0.88; }
+  36% { scale: 1 1.08; }
+  52%, 100% { scale: 1 1; }
+}
+.logo[data-bpm]::after {
+  content: attr(data-bpm);
+  position: absolute; left: 100%; bottom: .18em; margin-left: 10px;
+  font: 700 11px/1 var(--mono); letter-spacing: .04em; white-space: nowrap;
+  color: var(--signal);
+  opacity: 0; transform: translateX(-4px);
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+  pointer-events: none;
+}
+.logo:hover::after, .logo:focus-visible::after { opacity: 1; transform: none; }
+.beat-note { color: var(--muted); }
 @keyframes beat {
   0%, 60%, 100% { scale: 1 1; }
   15% { scale: 1 0.55; }
@@ -714,3 +734,38 @@ ol, ul { padding: 0; list-style: none; }
 .rest-remember { font-size: 12px; display: flex; gap: 6px; align-items: center; }
 .rest-err { font-size: 13px; font-weight: 700; color: #0b0c0e; background: rgba(255, 255, 255, 0.6); padding: 6px 10px; border-radius: 6px; }
 .rest-cancel { justify-self: start; background: none; border: 0; padding: 0; color: rgba(11, 12, 14, 0.75); font: 600 12px/1 var(--sans); text-decoration: underline; cursor: pointer; }
+
+/* ---------- Konfetti når ukesmålet er nådd ---------- */
+.confetti { position: fixed; inset: 0; z-index: 50; pointer-events: none; overflow: hidden; }
+.confetti i {
+  position: absolute; top: -30px; display: block;
+  border-radius: 2px;
+  transform: skewX(var(--slant));
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1);
+  animation-fill-mode: forwards;
+  opacity: 0;
+}
+@keyframes confetti-fall {
+  0% { opacity: 1; translate: 0 0; rotate: 0deg; }
+  85% { opacity: 1; }
+  100% { opacity: 0; translate: var(--drift) 105vh; rotate: var(--rot); }
+}
+.confetti-msg {
+  position: absolute; left: 50%; top: 22%;
+  transform: translateX(-50%) skewX(var(--slant));
+  background: #0b0c0e; color: #f1efe9;
+  box-shadow: 0 0 0 2px var(--signal);
+  padding: 12px 22px; border-radius: 8px;
+  font: 900 italic 26px/1 var(--display); font-stretch: 75%; text-transform: uppercase; white-space: nowrap;
+  animation: confetti-msg 3.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.confetti-msg > span { display: inline-block; transform: skewX(calc(var(--slant) * -1)); }
+@keyframes confetti-msg {
+  0% { opacity: 0; scale: .7; }
+  12% { opacity: 1; scale: 1.06; }
+  20% { scale: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; translate: 0 -12px; }
+}
+@media (max-width: 480px) { .confetti-msg { font-size: 19px; padding: 10px 16px; } }

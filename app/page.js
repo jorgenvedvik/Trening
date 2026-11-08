@@ -22,7 +22,7 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav, WeekSwitch, RestButton } from "./ui";
+import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti } from "./ui";
 import { getRestDays, storeConfigured } from "../lib/store";
 
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
@@ -170,6 +170,11 @@ export default async function Page() {
   const maxDayKm = Math.max(...(week?.days.map((d) => d.km ?? 0) ?? [0]), ...weekRuns.map((r) => r.km), 1);
 
   const todayWd = weekday(today);
+  // i-blokken i logoen slår i snittpulsen fra siste løpetur
+  const lastHrRun = runs.find((r) => r.avgHr);
+  const beat = lastHrRun
+    ? { hr: lastHrRun.avgHr, name: lastHrRun.name, dur: Math.round((60 / lastHrRun.avgHr) * 1000) / 1000 }
+    : { hr: null, name: null, dur: 1 };
   // Uker man kan bla i: forrige, denne og fire fram
   const OFFSET_LABEL = { "-1": "Forrige uke", 0: "Denne uka", 1: "Neste uke" };
   const weekViews = [-1, 0, 1, 2, 3, 4]
@@ -202,7 +207,14 @@ export default async function Page() {
       {/* ---------- Topplinje ---------- */}
       <header className="bar">
         <div className="bar-in">
-          <a href="#idag" className="logo" aria-label="split – til toppen">
+          <a
+            href="#idag"
+            className="logo"
+            aria-label="split – til toppen"
+            data-bpm={beat.hr ? `♥ ${beat.hr}` : undefined}
+            title={beat.hr ? `i-blokken slår i ${beat.hr} bpm – snittpulsen fra «${beat.name}»` : undefined}
+            style={{ "--beat": `${beat.dur}s` }}
+          >
             <span aria-hidden>s</span>
             <span aria-hidden>p</span>
             <span className="lc" aria-hidden>l</span>
@@ -224,6 +236,7 @@ export default async function Page() {
         </div>
       </header>
 
+      <GoalConfetti weekStart={monday} reached={Boolean(target && weekKm >= target)} km={weekKm} />
       <main className="wrap">
         {/* ---------- I dag ---------- */}
         <section id="idag" className="hero anchor">
@@ -617,6 +630,11 @@ export default async function Page() {
           {source === "strava" ? (
             <p>
               <span className="live" /> Live fra Strava
+              {beat.hr && (
+                <span className="beat-note">
+                  {" "}· i-blokken slår i {beat.hr} bpm – snittpulsen fra «{beat.name}»
+                </span>
+              )}
             </p>
           ) : (
             <p>

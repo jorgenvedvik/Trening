@@ -2,17 +2,117 @@
   "_note": "Reserve-data som brukes når Strava-nøklene ikke er satt i Vercel. Oppdateres manuelt.",
   "updated": "2026-11-04",
   "activities": [
-    { "date": "2026-11-02", "name": "Kveldstur etter gymmen", "type": "Run", "km": 7.30, "movingTime": 2858, "elevation": 160, "cadence": 157 },
-    { "date": "2026-10-31", "name": "Nittedal – Kjelsås", "type": "Run", "km": 14.55, "movingTime": 5816, "elevation": 228, "cadence": 156 },
-    { "date": "2026-10-26", "name": "Sleten", "type": "Run", "km": 7.32, "movingTime": 2960, "elevation": 115, "cadence": 158 },
-    { "date": "2026-10-25", "name": "Vått i marka i dag", "type": "Run", "km": 13.90, "movingTime": 7508, "elevation": 392, "cadence": 144 },
-    { "date": "2026-10-22", "name": "Prøve en rask 10k", "type": "Run", "km": 10.03, "movingTime": 3102, "elevation": 56, "cadence": 167 },
-    { "date": "2026-10-19", "name": "Chill tur", "type": "Run", "km": 8.65, "movingTime": 3289, "elevation": 129, "cadence": 159 },
-    { "date": "2026-10-17", "name": "Lørdagstur til Songsvann", "type": "Run", "km": 11.69, "movingTime": 4577, "elevation": 157, "cadence": 160 },
-    { "date": "2026-10-15", "name": "Afterwork opp akerselva", "type": "Run", "km": 7.03, "movingTime": 2886, "elevation": 167, "cadence": 155 },
-    { "date": "2026-10-12", "name": "Restitusjonstur i høstmørket", "type": "Run", "km": 4.15, "movingTime": 1706, "elevation": 86, "cadence": 155 },
-    { "date": "2026-10-08", "name": "Terskelintervaller", "type": "Run", "km": 9.48, "movingTime": 3276, "elevation": 114, "cadence": 159 },
-    { "date": "2026-10-05", "name": "Akerselva opp med eskilsen", "type": "Run", "km": 7.17, "movingTime": 3047, "elevation": 158, "cadence": 157 },
-    { "date": "2026-10-03", "name": "Ullevålseter + bolle = <3", "type": "Run", "km": 16.07, "movingTime": 7781, "elevation": 440, "cadence": 151 }
+    {
+      "date": "2026-11-02",
+      "name": "Kveldstur etter gymmen",
+      "type": "Run",
+      "km": 7.3,
+      "movingTime": 2858,
+      "elevation": 160,
+      "cadence": 157,
+      "avgHr": 163
+    },
+    {
+      "date": "2026-10-31",
+      "name": "Nittedal – Kjelsås",
+      "type": "Run",
+      "km": 14.55,
+      "movingTime": 5816,
+      "elevation": 228,
+      "cadence": 156,
+      "avgHr": 154
+    },
+    {
+      "date": "2026-10-26",
+      "name": "Sleten",
+      "type": "Run",
+      "km": 7.32,
+      "movingTime": 2960,
+      "elevation": 115,
+      "cadence": 158,
+      "avgHr": 148
+    },
+    {
+      "date": "2026-10-25",
+      "name": "Vått i marka i dag",
+      "type": "Run",
+      "km": 13.9,
+      "movingTime": 7508,
+      "elevation": 392,
+      "cadence": 144,
+      "avgHr": 150
+    },
+    {
+      "date": "2026-10-22",
+      "name": "Prøve en rask 10k",
+      "type": "Run",
+      "km": 10.03,
+      "movingTime": 3102,
+      "elevation": 56,
+      "cadence": 167
+    },
+    {
+      "date": "2026-10-19",
+      "name": "Chill tur",
+      "type": "Run",
+      "km": 8.65,
+      "movingTime": 3289,
+      "elevation": 129,
+      "cadence": 159
+    },
+    {
+      "date": "2026-10-17",
+      "name": "Lørdagstur til Songsvann",
+      "type": "Run",
+      "km": 11.69,
+      "movingTime": 4577,
+      "elevation": 157,
+      "cadence": 160
+    },
+    {
+      "date": "2026-10-15",
+      "name": "Afterwork opp akerselva",
+      "type": "Run",
+      "km": 7.03,
+      "movingTime": 2886,
+      "elevation": 167,
+      "cadence": 155
+    },
+    {
+      "date": "2026-10-12",
+      "name": "Restitusjonstur i høstmørket",
+      "type": "Run",
+      "km": 4.15,
+      "movingTime": 1706,
+      "elevation": 86,
+      "cadence": 155
+    },
+    {
+      "date": "2026-10-08",
+      "name": "Terskelintervaller",
+      "type": "Run",
+      "km": 9.48,
+      "movingTime": 3276,
+      "elevation": 114,
+      "cadence": 159
+    },
+    {
+      "date": "2026-10-05",
+      "name": "Akerselva opp med eskilsen",
+      "type": "Run",
+      "km": 7.17,
+      "movingTime": 3047,
+      "elevation": 158,
+      "cadence": 157
+    },
+    {
+      "date": "2026-10-03",
+      "name": "Ullevålseter + bolle = <3",
+      "type": "Run",
+      "km": 16.07,
+      "movingTime": 7781,
+      "elevation": 440,
+      "cadence": 151
+    }
   ]
 }
