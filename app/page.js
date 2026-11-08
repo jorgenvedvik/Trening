@@ -33,7 +33,6 @@ const NAV = [
   { id: "idag", label: "I dag" },
   { id: "uka", label: "Uka" },
   { id: "rotasjon", label: "Rotasjon" },
-  { id: "styrke", label: "Styrke" },
   { id: "sesong", label: "Sesong" },
   { id: "okter", label: "Øktene" },
   { id: "turer", label: "Turer" },
@@ -193,7 +192,6 @@ export default async function Page() {
     [...(week?.days ?? []), ...(nextWeek?.days ?? [])].find(
       (d) => d.run && (d.date > today || (d.date === today && !doneToday))
     ) ?? null;
-  const nextRot = Object.fromEntries(Object.keys(plan.rotations).map((k) => [k, upcomingRotation(k, today, 1)[0]]));
   const season = seasonWeeks(today, runs, 7, 4);
   const seasonMax = Math.max(...season.map((s) => Math.max(s.km ?? 0, s.target ?? 0)), 10);
   const raceDays = daysToRace(today);
@@ -403,66 +401,6 @@ export default async function Page() {
             {Object.keys(plan.rotations).map((k) => (
               <RotationBlock key={k} rkey={k} today={today} />
             ))}
-          </div>
-        </section>
-
-        {/* ---------- Styrke ---------- */}
-        <section id="styrke" className="sec anchor">
-          <div className="sec-head">
-            <h2>Styrke</h2>
-            <p>Én slot = ett formål. Velg det alternativet gymmen har ledig.</p>
-          </div>
-          <div className="str">
-            {["legs", "push", "pull"].map((k) => {
-              const s = plan.strength[k];
-              const isToday = tPlan && (tPlan.strength === k || (k === "pull" && tPlan.strength === "light-pull"));
-              const nextDay = (() => {
-                for (let d = today, i = 0; i < 30; i++, d = addDays(d, 1)) if (strengthFor(d) === k) return d;
-                return null;
-              })();
-              const days = [
-                !nextDay ? "–" : nextDay === today ? "I dag" : `Neste ${DAY_SHORT[weekday(nextDay) - 1].toLowerCase()} ${shortDate(nextDay)}`,
-              ];
-              return (
-                <details key={k} className={`card str-c ${isToday ? "str-now" : ""}`} open={isToday || undefined}>
-                  <summary>
-                    <div>
-                      <p className="str-title">
-                        {k === "legs" && nextDay ? `Legs · ${legsModeFor(nextDay)}` : s.title}
-                        {isToday && <span className="now-tag">I dag</span>}
-                      </p>
-                      <p className="str-sub">
-                        {days.join(" + ")} · {s.slots.length} slots
-                      </p>
-                    </div>
-                    <span className="chev" aria-hidden />
-                  </summary>
-                  <p className="str-note">{s.subtitle}</p>
-                  <ol className="slots">
-                    {s.slots.map((slot, i) => (
-                      <li key={slot.purpose}>
-                        <span className="slot-n">{i + 1}</span>
-                        <div>
-                          <p className="slot-p">{slot.purpose}</p>
-                          <p className="slot-o">
-                            {slot.rotation && nextRot[slot.rotation] ? (
-                              <>
-                                <b>{nextRot[slot.rotation].item.name}</b> ·{" "}
-                                {nextRot[slot.rotation].date === today ? "i dag" : `neste ${shortDate(nextRot[slot.rotation].date)}`}
-                              </>
-                            ) : (
-                              slot.options.join(" / ")
-                            )}
-                          </p>
-                        </div>
-                        <span className="slot-d">{slot.rotation && nextRot[slot.rotation] ? nextRot[slot.rotation].item.dose : slot.dose}</span>
-                      </li>
-                    ))}
-                  </ol>
-                  {s.note && <p className="str-note">{s.note}</p>}
-                </details>
-              );
-            })}
           </div>
         </section>
 
