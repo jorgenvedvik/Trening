@@ -194,7 +194,7 @@
     {
       "day": 6,
       "name": "Lørdag",
-      "strength": "light-pull",
+      "strength": "core",
       "run": "long",
       "runLabel": "Langtur"
     },
@@ -434,14 +434,14 @@
         }
       ]
     },
-    "light-pull": {
-      "title": "Evt. lett pull",
-      "subtitle": "Valgfritt på kvelden etter langturen. Kun fra pull-lista – aldri markløft etter langtur.",
+    "rest": {
+      "title": "Hvile",
+      "subtitle": "Full hvile. Det er her formen faktisk bygges.",
       "slots": []
     },
-    "rest": {
-      "title": "Hvile / rolige armer",
-      "subtitle": "Restitusjon. Evt. lett armøkt eller gåtur.",
+    "core": {
+      "title": "Evt. core / mobilitet",
+      "subtitle": "Valgfritt etter langturen: 10–15 min core, hofter og legg. Ingen pull – ryggen skal hvile til onsdag.",
       "slots": []
     }
   },
