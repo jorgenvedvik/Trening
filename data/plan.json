@@ -584,5 +584,10 @@
       "legs",
       "pull"
     ]
+  },
+  "auth": {
+    "_note": "Hash (scrypt) av passordet for «Hvile i dag»-knappen. PLAN_PASSWORD i Vercel overstyrer denne.",
+    "salt": "43b3452dde24cb34ed5dcc1b1e6aba46",
+    "hash": "1b0df570e4963152cce324a5fd62cb8377f9a20b245cf8d58311ab366d9d8c80"
   }
 }

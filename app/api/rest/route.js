@@ -1,22 +1,31 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { timingSafeEqual } from "node:crypto";
+import { timingSafeEqual, scryptSync } from "node:crypto";
+import plan from "../../../data/plan.json";
 import { addRestDay, removeRestDay, storeConfigured, REST_TAG } from "../../../lib/store";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function passwordOk(given) {
+  if (typeof given !== "string" || !given) return false;
   const pw = process.env.PLAN_PASSWORD;
-  if (!pw || typeof given !== "string") return false;
-  const a = Buffer.from(given);
-  const b = Buffer.from(pw);
-  return a.length === b.length && timingSafeEqual(a, b);
+  if (pw) {
+    const a = Buffer.from(given);
+    const b = Buffer.from(pw);
+    return a.length === b.length && timingSafeEqual(a, b);
+  }
+  // Ellers: sammenlign mot hash i plan.json (passordet ligger ikke i klartekst i repoet)
+  const { salt, hash } = plan.auth ?? {};
+  if (!salt || !hash) return false;
+  const got = scryptSync(given, salt, 32);
+  const want = Buffer.from(hash, "hex");
+  return got.length === want.length && timingSafeEqual(got, want);
 }
 
 // POST { date: "YYYY-MM-DD", action: "add" | "remove", password }
 export async function POST(request) {
-  if (!storeConfigured() || !process.env.PLAN_PASSWORD) {
-    return NextResponse.json({ error: "Lagring eller PLAN_PASSWORD er ikke satt opp i Vercel." }, { status: 503 });
+  if (!storeConfigured()) {
+    return NextResponse.json({ error: "Lagringen er ikke satt opp i Vercel ennå." }, { status: 503 });
   }
   let body;
   try {
