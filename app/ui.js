@@ -103,3 +103,87 @@ export function WeekSwitch({ weeks, initial = 0 }) {
     </>
   );
 }
+
+/** «Hvile i dag»-knapp med passord. Flytter styrkerekkefølgen én dag. */
+export function RestButton({ date, isRest, enabled }) {
+  const [open, setOpen] = useState(false);
+  const [pw, setPw] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [state, setState] = useState({ busy: false, error: "" });
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("puls-pw");
+      if (saved) {
+        setPw(saved);
+        setRemember(true);
+      }
+    } catch {}
+  }, []);
+
+  if (!enabled) return null;
+
+  async function submit(e) {
+    e.preventDefault();
+    setState({ busy: true, error: "" });
+    try {
+      const res = await fetch("/api/rest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, action: isRest ? "remove" : "add", password: pw }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setState({ busy: false, error: json.error || "Noe gikk galt." });
+        return;
+      }
+      try {
+        if (remember) localStorage.setItem("puls-pw", pw);
+        else localStorage.removeItem("puls-pw");
+      } catch {}
+      window.location.reload();
+    } catch {
+      setState({ busy: false, error: "Fikk ikke kontakt. Prøv igjen." });
+    }
+  }
+
+  if (!open) {
+    return (
+      <button type="button" className="rest-btn" onClick={() => setOpen(true)}>
+        {isRest ? "Angre hviledag" : "Hvile i dag – flytt planen"}
+      </button>
+    );
+  }
+
+  return (
+    <form className="rest-form" onSubmit={submit}>
+      <p className="rest-info">
+        {isRest
+          ? "Dagen blir en vanlig styrkedag igjen, og rekkefølgen flyttes tilbake."
+          : "Styrkerekkefølgen og rotasjonene flyttes én dag fram. Løpingen står som før."}
+      </p>
+      <div className="rest-row">
+        <input
+          type="password"
+          className="rest-pw"
+          placeholder="Passord"
+          autoComplete="current-password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
+          autoFocus
+          required
+        />
+        <button type="submit" className="rest-go" disabled={state.busy || !pw}>
+          {state.busy ? "Lagrer …" : isRest ? "Angre" : "Bekreft"}
+        </button>
+      </div>
+      <label className="rest-remember">
+        <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Husk passordet på denne enheten
+      </label>
+      {state.error && <p className="rest-err">{state.error}</p>}
+      <button type="button" className="rest-cancel" onClick={() => setOpen(false)}>
+        Avbryt
+      </button>
+    </form>
+  );
+}

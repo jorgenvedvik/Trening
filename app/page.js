@@ -10,6 +10,8 @@ import {
   fmtMin,
   fmtPace,
   rotationFor,
+  setRestDays,
+  isRestDay,
   strengthFor,
   legsModeFor,
   rotationKeyFor,
@@ -20,7 +22,8 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav, WeekSwitch } from "./ui";
+import { CountUp, SectionNav, WeekSwitch, RestButton } from "./ui";
+import { getRestDays, storeConfigured } from "../lib/store";
 
 export const revalidate = 600; // hent Strava på nytt hvert 10. minutt
 
@@ -129,6 +132,7 @@ function RotationBlock({ rkey, today }) {
 
 export default async function Page() {
   const today = osloToday();
+  setRestDays(await getRestDays());
   const monday = mondayOf(today);
   const { runs, source, updated, error } = await getRuns(addDays(monday, -7 * 7));
 
@@ -149,7 +153,16 @@ export default async function Page() {
     : null;
   const status = week ? paceStatus(weekKm - expected) : null;
 
-  const coach = coachLine({ tPlan, doneToday, doneTodayKm, week });
+  const tomorrow = addDays(today, 1);
+  const tomorrowStr = strengthFor(tomorrow);
+  const coach = coachLine({
+    tPlan,
+    doneToday,
+    doneTodayKm,
+    week,
+    restToday: isRestDay(today),
+    tomorrowLabel: tomorrowStr === "legs" ? `Legs (${legsModeFor(tomorrow)})` : plan.strength[tomorrowStr]?.title,
+  });
   const tEst = runEst(tPlan);
   const thr = estimateThreshold();
   const tBench = tPlan ? rotationFor(rotationKeyFor(tPlan.strength), tPlan.date) : null;
@@ -258,6 +271,9 @@ export default async function Page() {
                 </div>
               )}
             </div>
+            {tPlan && today >= plan.split.anchorDate && (
+              <RestButton date={today} isRest={isRestDay(today)} enabled={storeConfigured()} />
+            )}
           </article>
 
           <article className="km card rise" style={{ "--i": 1 }}>
@@ -401,15 +417,18 @@ export default async function Page() {
               const s = plan.strength[k];
               const isToday = tPlan && (tPlan.strength === k || (k === "pull" && tPlan.strength === "light-pull"));
               const nextDay = (() => {
-                for (let d = today, i = 0; i < 4; i++, d = addDays(d, 1)) if (strengthFor(d) === k) return d;
+                for (let d = today, i = 0; i < 30; i++, d = addDays(d, 1)) if (strengthFor(d) === k) return d;
+                return null;
               })();
-              const days = [nextDay === today ? "I dag" : `Neste ${DAY_SHORT[weekday(nextDay) - 1].toLowerCase()} ${shortDate(nextDay)}`];
+              const days = [
+                !nextDay ? "–" : nextDay === today ? "I dag" : `Neste ${DAY_SHORT[weekday(nextDay) - 1].toLowerCase()} ${shortDate(nextDay)}`,
+              ];
               return (
                 <details key={k} className={`card str-c ${isToday ? "str-now" : ""}`} open={isToday || undefined}>
                   <summary>
                     <div>
                       <p className="str-title">
-                        {k === "legs" ? `Legs · ${legsModeFor(nextDay)}` : s.title}
+                        {k === "legs" && nextDay ? `Legs · ${legsModeFor(nextDay)}` : s.title}
                         {isToday && <span className="now-tag">I dag</span>}
                       </p>
                       <p className="str-sub">
