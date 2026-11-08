@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "PULS · løpeplanen",
+  title: "split · løpeplanen",
   description: "Jørgens løpe- og styrkedashboard mot Oslo Maraton 2027",
   icons: { icon: "/icon.svg" },
 };
@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=Outfit:wght@900&family=JetBrains+Mono:wght@500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -139,32 +139,31 @@ ol, ul { padding: 0; list-style: none; }
   align-items: center;
   gap: 24px;
 }
+/* split-ordmerket: Outfit Black, små bokstaver, tett sporing.
+   Toppen av l og t er kappet i −12°, i-prikken er den skrå blokken som slår. */
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: inline-flex;
+  align-items: flex-end;
   text-decoration: none;
-  font-family: var(--display);
-  font-stretch: 75%;
-  font-style: italic;
+  font-family: "Outfit", var(--sans);
   font-weight: 900;
-  font-size: 26px;
-  letter-spacing: 0.01em;
+  font-size: 34px;
+  letter-spacing: -0.035em;
   line-height: 1;
+  color: var(--ink);
 }
-.logo-mark { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
-.logo-mark i {
-  display: block;
-  width: 5px;
+.logo > span { display: inline-block; position: relative; }
+.logo .lc { clip-path: polygon(-10% 30%, 110% 22.5%, 110% 110%, -10% 110%); }
+.logo .lii { display: inline-block; clip-path: polygon(-10% 47%, 110% 40%, 110% 110%, -10% 110%); }
+.logo .ldot {
+  position: absolute; left: 47%; top: 19%;
+  width: .2em; height: .2em; margin-left: -.07em;
   background: var(--signal);
+  border-radius: .02em;
   transform: skewX(var(--slant));
-  border-radius: 1px;
-  animation: beat 2.4s var(--ease-in-out) infinite;
   transform-origin: bottom;
+  animation: beat 2.4s var(--ease-in-out) infinite;
 }
-.logo-mark i:nth-child(1) { height: 45%; animation-delay: 0s; }
-.logo-mark i:nth-child(2) { height: 100%; animation-delay: 0.12s; }
-.logo-mark i:nth-child(3) { height: 70%; animation-delay: 0.24s; }
 @keyframes beat {
   0%, 60%, 100% { scale: 1 1; }
   15% { scale: 1 0.55; }
