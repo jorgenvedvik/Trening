@@ -52,3 +52,8 @@ export async function POST(request) {
   revalidatePath("/");
   return NextResponse.json({ ok: true });
 }
+
+// GET: viser bare om lagringen er koblet til (ingen data)
+export async function GET() {
+  return NextResponse.json({ storage: storeConfigured() }, { headers: { "Cache-Control": "no-store" } });
+}
