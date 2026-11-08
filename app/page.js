@@ -67,6 +67,7 @@ function RotationBlock({ rkey, today }) {
   const next = list[0];
   if (!next) return null;
   const started = today >= rot.anchorDate;
+  const nextTest = rot.testEvery ? upcomingRotation(rkey, today, rot.testEvery * rot.cycle.length + 1).find((x) => x.item.isTest) : null;
   return (
     <div className="rot-block">
       <h3 className="rot-h">{rot.title}</h3>
@@ -97,6 +98,12 @@ function RotationBlock({ rkey, today }) {
                 </li>
               ))}
             </ol>
+            {nextTest && (
+              <p className="bk-test">
+                <span className="bk-test-k">1RM-test</span>
+                {nextTest.date === today ? "i dag" : `${DAY_LONG[weekday(nextTest.date) - 1].toLowerCase()} ${shortDate(nextTest.date)}`} · hver {rot.testEvery}. runde, i stedet for steg 1
+              </p>
+            )}
           </div>
           <div className="card bk-cal">
             <p className="eyebrow">Deretter</p>

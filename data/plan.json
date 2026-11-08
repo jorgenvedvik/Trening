@@ -532,49 +532,59 @@
       "noun": "benkøkt"
     },
     "pullup": {
-      "_note": "Roterer på hver pull-dag (ons + fre). Alt med vekt, 2–6 reps, styrt med RPE. anchorDate = første dag med steg 1.",
+      "_note": "Roterer på hver pull-dag (ons + fre). Ons = tung, fre = volum. Alt med vekt, styrt med reps i reserve. Hver testEvery-runde byttes steg 1 med test. anchorDate = første dag med steg 1.",
       "title": "Pullups",
       "strength": "pull",
       "noun": "pullup-økt",
       "anchorDate": "2026-11-11",
       "cycle": [
         {
-          "key": "double",
-          "name": "Tung dobbel",
-          "tag": "Dobbel",
+          "key": "single",
+          "name": "Tung singel + backoff",
+          "tag": "Singel",
           "intensity": "tung",
           "level": 3,
-          "dose": "Opp til tung 2 @ RPE 9, så 3×2 med −5 kg",
-          "cue": "Dødt heng i bunn og haka over stanga på hver rep. Går dobbelen lettere enn RPE 9: +1,25–2,5 kg neste gang."
-        },
-        {
-          "key": "speed",
-          "name": "Fartsdag",
-          "tag": "Fart",
-          "intensity": "lett",
-          "level": 1,
-          "dose": "6×2 @ RPE 6",
-          "cue": "Lett belte, maks fart opp, kontrollert ned. Hver rep skal se lik ut."
-        },
-        {
-          "key": "pause",
-          "name": "Pauserep",
-          "tag": "Pauserep",
-          "intensity": "tung",
-          "level": 3,
-          "dose": "4×3 @ RPE 8, 2 sek dødt heng",
-          "cue": "Full stopp i bunn uten å miste spenningen i skuldrene. Bygger styrke der pullups oftest stopper."
+          "dose": "Singel med 1 i reserve, så 4×3 med 2 i reserve",
+          "cue": "Bygg opp i hopp på 5–10 kg. Backoff ca. 10 % lettere enn singelen."
         },
         {
           "key": "volume",
-          "name": "Volumdag",
+          "name": "Volum",
           "tag": "Volum",
           "intensity": "moderat",
           "level": 2,
-          "dose": "4×5 @ RPE 8",
-          "cue": "Samme belte på alle sett. Klarer du 5 på alle: +1,25–2,5 kg neste gang."
+          "dose": "4×6, 2 i reserve",
+          "cue": "Samme belte på alle sett. Klarer du 6 på alle: +1,25–2,5 kg neste gang."
+        },
+        {
+          "key": "triple",
+          "name": "Tung trippel",
+          "tag": "Trippel",
+          "intensity": "tung",
+          "level": 3,
+          "dose": "5×3, 1 i reserve",
+          "cue": "3–4 min pause. Klarer du alle 5 settene: +1,25–2,5 kg neste gang."
+        },
+        {
+          "key": "pausevol",
+          "name": "Pausevolum",
+          "tag": "Pause",
+          "intensity": "moderat",
+          "level": 2,
+          "dose": "3×5 med 2 sek dødt heng, 2 i reserve",
+          "cue": "Full stopp i bunn uten å slippe spenningen i skuldrene. Bygger styrke der pullups oftest stopper."
         }
-      ]
+      ],
+      "testEvery": 4,
+      "test": {
+        "key": "test",
+        "name": "1RM-test",
+        "tag": "Test",
+        "intensity": "tung",
+        "level": 3,
+        "dose": "Jobb opp til ekte maks – singler med 3–5 min pause",
+        "cue": "Fasiten. Dødt heng, haka over stanga. Logg maksen – den styrer de neste ukene."
+      }
     }
   }
 }
