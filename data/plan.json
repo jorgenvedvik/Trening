@@ -169,14 +169,14 @@
     {
       "day": 3,
       "name": "Onsdag",
-      "run": null
+      "run": "quality",
+      "share": 0.33,
+      "runLabel": "Rolig eller terskel"
     },
     {
       "day": 4,
       "name": "Torsdag",
-      "run": "quality",
-      "share": 0.33,
-      "runLabel": "Rolig eller terskel"
+      "run": null
     },
     {
       "day": 5,
