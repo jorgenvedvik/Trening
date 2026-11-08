@@ -39,6 +39,19 @@ function runEst(d) {
   return { mid: e.mid, low: e.low, high: e.high, pace: e.pace };
 }
 
+function Level({ n, label }) {
+  return (
+    <span className="lvl" aria-label={`Belastning ${n} av 3`}>
+      <span className="lvl-bars" aria-hidden>
+        {[1, 2, 3].map((i) => (
+          <i key={i} className={i <= n ? "on" : ""} />
+        ))}
+      </span>
+      {label && <span className="lvl-l">{label}</span>}
+    </span>
+  );
+}
+
 function strengthText(d) {
   if (d.strength !== "push") return d.strengthLabel;
   const b = benchFor(d.date);
@@ -299,42 +312,58 @@ export default async function Page() {
         {/* ---------- Benkrotasjon ---------- */}
         <section id="benk" className="sec anchor">
           <div className="sec-head">
-            <h2>Benkrotasjon</h2>
-            <p>Fire varianter på rad, én per push-dag. Mandag og torsdag.</p>
+            <h2>Benk</h2>
+            <p>Fire varianter i fast rekkefølge – én per push-dag (man + tor).</p>
           </div>
-          <div className="bench card">
-            <ol className="rot">
-              {plan.bench.cycle.map((b, i) => (
-                <li key={b.key} className={`rot-step rot-${b.intensity} ${nextBench?.bench.index === i ? "rot-on" : ""}`}>
-                  <div className="rot-top">
-                    <span className="rot-n">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="rot-int">
-                      <span>{nextBench?.bench.index === i ? (nextBench.date === today ? "I dag" : "Neste") : b.intensity}</span>
-                    </span>
-                  </div>
-                  <p className="rot-name">{b.name}</p>
-                  <p className="rot-dose">{b.dose}</p>
-                  <p className="rot-cue">{b.cue}</p>
-                </li>
-              ))}
-            </ol>
-            <div className="upc">
-              <p className="eyebrow">Neste push-dager</p>
-              <ol className="upc-list">
-                {pushList.map((p) => (
-                  <li key={p.date} className={`upc-i rot-${p.bench.intensity} ${p.date === today ? "upc-now" : ""}`}>
-                    <span className="upc-d">
-                      {DAY_SHORT[weekday(p.date) - 1]} {shortDate(p.date)}
-                    </span>
-                    <span className="upc-b">
-                      <i>{p.bench.index + 1}</i>
-                      {p.bench.name}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+          {nextBench && (
+            <div className="bk">
+              {/* 1. Det viktigste: neste benkøkt */}
+              <article className="bk-next">
+                <p className="eyebrow">
+                  {nextBench.date === today ? "I dag" : `Neste benkøkt · ${DAY_LONG[weekday(nextBench.date) - 1].toLowerCase()} ${shortDate(nextBench.date)}`}
+                </p>
+                <h3 className="bk-name">{nextBench.bench.name}</h3>
+                <p className="bk-dose">{nextBench.bench.dose}</p>
+                <p className="bk-cue">{nextBench.bench.cue}</p>
+                <Level n={nextBench.bench.level} label={nextBench.bench.intensity} />
+                <span className="bk-num" aria-hidden>
+                  {String(nextBench.bench.index + 1).padStart(2, "0")}
+                </span>
+              </article>
+
+              <div className="bk-side">
+                {/* 2. Hvor i rotasjonen: én bane, fire steg */}
+                <div className="card bk-track-card">
+                  <p className="eyebrow">Rotasjonen</p>
+                  <ol className="bk-track">
+                    {plan.bench.cycle.map((c, i) => (
+                      <li key={c.key} className={i === nextBench.bench.index ? "on" : ""}>
+                        <span className="bk-step">{i + 1}</span>
+                        <span className="bk-tag">{c.tag}</span>
+                        <Level n={c.level} />
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* 3. Kalenderen: bare dato → variant */}
+                <div className="card bk-cal">
+                  <p className="eyebrow">Deretter</p>
+                  <ol>
+                    {pushList.slice(1, 7).map((p) => (
+                      <li key={p.date}>
+                        <span className="bk-d">
+                          {DAY_SHORT[weekday(p.date) - 1]} {shortDate(p.date)}
+                        </span>
+                        <span className="bk-v">{p.bench.name}</span>
+                        <Level n={p.bench.level} />
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </section>
 
         {/* ---------- Styrke ---------- */}

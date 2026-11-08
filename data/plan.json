@@ -492,7 +492,9 @@
         "short": "Tung touch-and-go",
         "intensity": "tung",
         "dose": "4×4–6 @ ~80–85 %",
-        "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause."
+        "cue": "Kontrollert ned, lett berøring på brystet, eksplosivt opp. 2–3 min pause.",
+        "tag": "Touch-and-go",
+        "level": 3
       },
       {
         "key": "larsen",
@@ -500,7 +502,9 @@
         "short": "Larsen-press",
         "intensity": "lett",
         "dose": "3×6–8 @ ~65–70 %",
-        "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon."
+        "cue": "Beina strake/løftet – ingen beindrive. Tettere fokus på stabil skulderposisjon.",
+        "tag": "Larsen",
+        "level": 1
       },
       {
         "key": "pause",
@@ -508,7 +512,9 @@
         "short": "Tung pauserep",
         "intensity": "tung",
         "dose": "4×3–5 @ ~78–82 %, 1–2 sek pause",
-        "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil."
+        "cue": "Helt dødt stopp på brystet, hold spenningen. Konkurranse-stil.",
+        "tag": "Pauserep",
+        "level": 3
       },
       {
         "key": "floor",
@@ -516,7 +522,9 @@
         "short": "Floor press",
         "intensity": "moderat",
         "dose": "4×5–6 @ ~75–80 % av benk",
-        "cue": "Albuene i gulvet, kort pause, press opp. Lockout-styrke."
+        "cue": "Albuene i gulvet, kort pause, press opp. Lockout-styrke.",
+        "tag": "Floor press",
+        "level": 2
       }
     ]
   }
