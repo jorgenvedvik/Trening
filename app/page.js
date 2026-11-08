@@ -235,12 +235,9 @@ export default async function Page() {
         <section id="idag" className="hero anchor">
           <article className={`today rise ${route ? "has-route" : ""}`} style={{ "--i": 0 }}>
             {route && (
-              <div className="route" title={`Siste tur: ${routeRun.name} · ${fmtKm(routeRun.km)} km`}>
-                <svg viewBox={`0 0 ${route.w} ${route.h}`} preserveAspectRatio="xMaxYMid meet" aria-hidden>
-                  <path className="route-line" d={route.d} pathLength="1" />
-                  <circle className="route-end" cx={route.end[0]} cy={route.end[1]} r="5" />
-                </svg>
-              </div>
+              <svg className="route" viewBox={`0 0 ${route.w} ${route.h}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
+                <path className="route-line" d={route.d} pathLength="1" />
+              </svg>
             )}
             <p className="eyebrow">
               {DAY_LONG[todayWd - 1]} {shortDate(today)} · uke {isoWeekNumber(today)}
