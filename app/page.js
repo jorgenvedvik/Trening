@@ -165,6 +165,7 @@ export default async function Page() {
   });
   const tEst = runEst(tPlan);
   const thr = estimateThreshold();
+  const SPLIT_NAME = { push: "Push", legs: "Legs", pull: "Pull", rest: "Hvile" };
   const tBench = tPlan ? rotationFor(rotationKeyFor(tPlan.strength), tPlan.date) : null;
   const weekMin = week ? week.days.reduce((s, d) => s + (runEst(d)?.mid ?? 0), 0) : 0;
   const runDays = week ? week.days.filter((d) => d.run) : [];
@@ -249,8 +250,15 @@ export default async function Page() {
               {tPlan && (
                 <div className="tb">
                   <p className="tb-k">Styrke{todayWd <= 5 ? " · etter jobb" : ""}</p>
-                  <p className="tb-v">{tBench ? tBench.name : tPlan.strengthLabel}</p>
-                  <p className="tb-s">{tBench ? tBench.dose : " "}</p>
+                  <p className="tb-v">{SPLIT_NAME[tPlan.strength] ?? tPlan.strengthLabel}</p>
+                  <p className="tb-s">
+                    {tBench
+                      ? tBench.name
+                      : tPlan.strength === "legs"
+                      ? `${legsModeFor(tPlan.date) === "tung" ? "Tung" : "Moderat"} økt`
+                      : " "}
+                  </p>
+                  {tBench && <p className="tb-s tb-dose">{tBench.dose}</p>}
                 </div>
               )}
               {tPlan?.run ? (
