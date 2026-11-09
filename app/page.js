@@ -258,7 +258,6 @@ export default async function Page() {
                       ? `${legsModeFor(tPlan.date) === "tung" ? "Tung" : "Moderat"} økt`
                       : " "}
                   </p>
-                  {tBench && <p className="tb-s tb-dose">{tBench.dose}</p>}
                 </div>
               )}
               {tPlan?.run ? (
