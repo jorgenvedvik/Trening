@@ -292,3 +292,29 @@ export function SunChip() {
     </div>
   );
 }
+
+const osloParts = (d) => {
+  const f = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Oslo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" });
+  const p = Object.fromEntries(f.formatToParts(d).map((x) => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, hour: Number(p.hour) };
+};
+
+/** Styrkefeltet i dagens kort. Regnes som gjennomført fra kl. 19 (med mindre dagen er hviledag). */
+export function StrengthBlock({ date, active, doneHour = 19, children }) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!active) return;
+    const check = () => {
+      const now = osloParts(new Date());
+      setDone(now.date > date || (now.date === date && now.hour >= doneHour));
+    };
+    check();
+    const t = setInterval(check, 60000);
+    return () => clearInterval(t);
+  }, [date, active, doneHour]);
+  return (
+    <div className={`tb tb-str ${done ? "tb-done" : ""}`} title={done ? "Regnes som gjennomført etter kl. 19" : undefined}>
+      {children}
+    </div>
+  );
+}

@@ -286,6 +286,12 @@ ol, ul { padding: 0; list-style: none; }
 .tb-time { font-weight: 500; color: #b5b9c1; font-size: 16px; }
 .tb-s { margin-top: 2px; font-size: 13px; color: #9a9ea6; }
 .tb-done .tb-v { color: var(--volt); }
+.tb-str .tb-v::before {
+  content: "✓"; display: inline-block; overflow: hidden; vertical-align: bottom;
+  max-width: 0; opacity: 0; scale: .4; transition: max-width .4s var(--ease), margin .4s var(--ease), opacity .3s, scale .5s cubic-bezier(.34, 1.56, .64, 1);
+}
+.tb-str.tb-done .tb-v::before { max-width: 1.2em; margin-right: .3em; opacity: 1; scale: 1; }
+.tb-str .tb-v { transition: color .4s var(--ease); }
 .tb-off .tb-v { color: #9a9ea6; }
 
 .km { display: flex; flex-direction: column; }

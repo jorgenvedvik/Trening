@@ -22,7 +22,7 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti, SunChip } from "./ui";
+import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti, SunChip, StrengthBlock } from "./ui";
 import { routePath } from "../lib/route";
 import { getRestDays, storeConfigured } from "../lib/store";
 
@@ -248,7 +248,7 @@ export default async function Page() {
 
             <div className="today-blocks">
               {tPlan && (
-                <div className="tb">
+                <StrengthBlock date={tPlan.date} active={["push", "legs", "pull"].includes(tPlan.strength)}>
                   <p className="tb-k">Styrke{todayWd <= 5 ? " · etter jobb" : ""}</p>
                   <p className="tb-v">{SPLIT_NAME[tPlan.strength] ?? tPlan.strengthLabel}</p>
                   <p className="tb-s">
@@ -258,7 +258,7 @@ export default async function Page() {
                       ? `${legsModeFor(tPlan.date) === "tung" ? "Tung" : "Moderat"} økt`
                       : " "}
                   </p>
-                </div>
+                </StrengthBlock>
               )}
               {tPlan?.run ? (
                 <div className={`tb ${doneToday ? "tb-done" : ""}`}>
