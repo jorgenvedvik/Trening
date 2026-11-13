@@ -584,7 +584,12 @@
       "legs",
       "pull"
     ],
-    "restDays": []
+    "restDays": [
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13"
+    ]
   },
   "auth": {
     "_note": "Hash (scrypt) av passordet for «Hvile i dag»-knappen. PLAN_PASSWORD i Vercel overstyrer denne.",
