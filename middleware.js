@@ -19,4 +19,4 @@ export function middleware(request) {
   });
 }
 
-export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg).*)"] };
+export const config = { matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-touch-icon.png|apple-touch-icon-precomposed.png).*)"] };

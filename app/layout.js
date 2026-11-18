@@ -3,7 +3,11 @@ import "./globals.css";
 export const metadata = {
   title: "split · løpeplanen",
   description: "Jørgens løpe- og styrkedashboard mot Oslo Maraton 2027",
-  icons: { icon: "/icon.svg" },
+  icons: {
+    icon: "/icon.svg",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: { title: "split" },
 };
 
 export const viewport = {
