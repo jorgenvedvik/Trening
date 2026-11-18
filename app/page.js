@@ -22,7 +22,7 @@ import {
 import { osloToday, addDays, mondayOf, weekday, isoWeekNumber, shortDate, formatDuration, formatPace } from "../lib/time";
 import { fmtKm, DAY_SHORT, DAY_LONG } from "../lib/format";
 import { coachLine, paceStatus } from "../lib/coach";
-import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti, SunChip, StrengthBlock } from "./ui";
+import { CountUp, SectionNav, WeekSwitch, RestButton, GoalConfetti, SunChip, StrengthBlock, SplitLogo } from "./ui";
 import { routePath } from "../lib/route";
 import { getRestDays, storeConfigured } from "../lib/store";
 
@@ -207,16 +207,7 @@ export default async function Page() {
       {/* ---------- Topplinje ---------- */}
       <header className="bar">
         <div className="bar-in">
-          <a href="#idag" className="logo" aria-label="split – til toppen">
-            <span aria-hidden>s</span>
-            <span aria-hidden>p</span>
-            <span className="lc" aria-hidden>l</span>
-            <span className="li" aria-hidden>
-              <span className="lii">i</span>
-              <i className="ldot" />
-            </span>
-            <span className="lc" aria-hidden>t</span>
-          </a>
+          <SplitLogo />
           <SectionNav items={NAV} />
           <SunChip />
           <div className="count" title={`${plan.race.name} ${plan.race.date}`}>

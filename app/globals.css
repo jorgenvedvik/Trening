@@ -155,20 +155,21 @@ ol, ul { padding: 0; list-style: none; }
 .logo > span { display: inline-block; position: relative; }
 .logo .lc { clip-path: polygon(-10% 30%, 110% 22.5%, 110% 110%, -10% 110%); }
 .logo .lii { display: inline-block; clip-path: polygon(-10% 47%, 110% 40%, 110% 110%, -10% 110%); }
+.logo .li { isolation: isolate; } /* prikken kan starte bak i-stammen */
 .logo .ldot {
-  position: absolute; left: 47%; top: 19%;
+  position: absolute; left: 47%; top: 19%; z-index: -1;
   width: .2em; height: .2em; margin-left: -.07em;
   background: var(--signal);
   border-radius: .02em;
   transform: skewX(var(--slant));
   transform-origin: bottom;
-  animation: beat 2.4s var(--ease-in-out) infinite;
 }
-@keyframes beat {
-  0%, 60%, 100% { scale: 1 1; }
-  15% { scale: 1 0.55; }
-  30% { scale: 1 1.08; }
+/* Logoen er skjult til inngangen starter (JS). Failsafe: vises uansett etter 2 s. */
+.logo.pre > span:not(.li), .logo.pre .lii, .logo.pre .ldot {
+  opacity: 0;
+  animation: logo-failsafe 0s 2s forwards;
 }
+@keyframes logo-failsafe { to { opacity: 1; } }
 
 .snav {
   display: flex;
@@ -566,6 +567,7 @@ ol, ul { padding: 0; list-style: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .logo.pre > span:not(.li), .logo.pre .lii, .logo.pre .ldot { opacity: 1; }
   html { scroll-behavior: auto; }
 }
 

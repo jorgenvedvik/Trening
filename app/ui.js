@@ -318,3 +318,185 @@ export function StrengthBlock({ date, active, doneHour = 19, children }) {
     </div>
   );
 }
+
+/* =========================================================
+   split-ordmerket med bevegelse
+   Inngang: bokstavene spretter opp, i-en sparker prikken ut (360° i lufta).
+   Deretter: prikken hopper av og til – aldri likt, og aldri mens du er i gang.
+   Prinsipper: anticipation, squash & stretch bare ved kraft, ekte parabel,
+   overlappende handling (snurren er ferdig før landing), aksjon–reaksjon
+   (i-en gir etter), én dempet ettersvingning. Se brand guidelines.
+   ========================================================= */
+const E_OUT = "cubic-bezier(.2,.75,.3,1)";
+const E_SOFT = "cubic-bezier(.45,0,.55,1)";
+const E_RISE = "cubic-bezier(.33,.67,.67,1)"; // parabel opp
+const E_FALL = "cubic-bezier(.33,0,.67,.33)"; // parabel ned
+
+const run = (el, kf, duration, delay = 0) => el.animate(kf, { duration, delay, fill: "both" });
+const clearAnims = (root) => root.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+function logoIntro(logo) {
+  const letters = [...logo.querySelectorAll(":scope > span:not(.li), .lii")];
+  const dot = logo.querySelector(".ldot");
+  letters.forEach((el, i) => {
+    el.style.transformOrigin = "50% 100%";
+    run(el, [
+      { transform: "translateY(.5em) scale(.85,.35)", opacity: 0, easing: E_OUT },
+      { transform: "translateY(-.1em) scale(.94,1.14)", opacity: 1, offset: 0.38, easing: E_SOFT },
+      { transform: "translateY(.015em) scale(1.06,.93)", offset: 0.62, easing: E_SOFT },
+      { transform: "translateY(0) scale(.99,1.02)", offset: 0.82, easing: E_SOFT },
+      { transform: "translateY(0) scale(1,1)", opacity: 1 },
+    ], 640, i * 45);
+  });
+  const L = 380, UP = 260, DOWN = 210, AIR = UP + DOWN, T = AIR + 300;
+  run(dot, [
+    { translate: "0 .3em", easing: E_RISE },
+    { translate: "0 -.36em", offset: UP / AIR, easing: E_FALL },
+    { translate: "0 0" },
+  ], AIR, L);
+  run(dot, [
+    { rotate: "y 0deg", easing: "cubic-bezier(.25,.45,.45,1)" },
+    { rotate: "y 360deg", offset: (AIR - 30) / AIR },
+    { rotate: "y 360deg" },
+  ], AIR, L);
+  run(dot, [{ opacity: 0 }, { opacity: 1 }], 40, L);
+  const last = run(dot, [
+    { scale: ".2 .2", easing: E_OUT },
+    { scale: ".9 1.15", offset: 90 / T, easing: E_SOFT },
+    { scale: "1 1", offset: UP / T, easing: "ease-in" },
+    { scale: ".92 1.1", offset: (AIR - 20) / T, easing: E_OUT },
+    { scale: "1.18 .8", offset: (AIR + 50) / T, easing: E_SOFT },
+    { scale: ".96 1.04", offset: (AIR + 160) / T, easing: E_SOFT },
+    { scale: "1 1" },
+  ], T, L);
+  return last.finished;
+}
+
+function logoHop(logo, { h = 0.4, spin = 360, A = 170, settle = 320 } = {}) {
+  const dot = logo.querySelector(".ldot");
+  const i = logo.querySelector(".lii");
+  i.style.transformOrigin = "50% 100%";
+  // Lufttid ∝ √høyde; kraften i klem/strekk følger høyden
+  const f = Math.sqrt(h / 0.4), k = Math.min(1.1, Math.max(0.45, h / 0.4));
+  const UP = Math.round(250 * f), AIR = UP + Math.round(210 * f);
+  const LAND = A + AIR, T = LAND + settle;
+  const o = (ms) => Math.min(1, ms / T);
+  const sq = (x, y) => `${(1 + (x - 1) * k).toFixed(3)} ${(1 + (y - 1) * k).toFixed(3)}`;
+
+  run(dot, [
+    { translate: "0 0", offset: 0 },
+    { translate: "0 0", offset: o(A), easing: E_RISE },
+    { translate: `0 -${h}em`, offset: o(A + UP), easing: E_FALL },
+    { translate: "0 0", offset: o(LAND) },
+    { translate: "0 0" },
+  ], T);
+  run(dot, [
+    { rotate: "y 0deg", offset: 0 },
+    { rotate: "y 0deg", offset: o(A + 30), easing: "cubic-bezier(.3,.35,.4,1)" },
+    { rotate: `y ${spin}deg`, offset: o(LAND - 40) },
+    { rotate: `y ${spin}deg` },
+  ], T);
+  const last = run(dot, [
+    { scale: "1 1", easing: "cubic-bezier(.4,0,.6,1)" },
+    { scale: sq(1.2, 0.72), offset: o(A), easing: E_OUT },
+    { scale: sq(0.86, 1.22), offset: o(A + 70), easing: E_SOFT },
+    { scale: "1 1", offset: o(A + UP), easing: "ease-in" },
+    { scale: sq(0.93, 1.1), offset: o(LAND - 15), easing: E_OUT },
+    { scale: sq(1.18, 0.8), offset: o(LAND + 50), easing: E_SOFT },
+    { scale: sq(0.97, 1.03), offset: o(LAND + 170), easing: E_SOFT },
+    { scale: "1 1" },
+  ], T);
+  run(i, [
+    { scale: "1 1", easing: E_SOFT },
+    { scale: sq(1, 0.965), offset: o(A), easing: E_OUT },
+    { scale: sq(1, 1.015), offset: o(A + 70), easing: E_SOFT },
+    { scale: "1 1", offset: o(A + 160) },
+    { scale: "1 1", offset: o(LAND), easing: E_OUT },
+    { scale: sq(1, 0.975), offset: o(LAND + 50), easing: E_SOFT },
+    { scale: "1 1", offset: o(LAND + 180) },
+    { scale: "1 1" },
+  ], T);
+  return last.finished;
+}
+
+/** Velger neste hopp: 60 % vanlig 360°, 25 % lite uten snurr, 15 % dobbelthopp. */
+function pickHop(history) {
+  let kind;
+  do {
+    const r = Math.random();
+    kind = r < 0.6 ? "full" : r < 0.85 ? "small" : "double";
+  } while (
+    (kind === "double" && history.at(-1) === "double") ||
+    (history.length >= 2 && history.slice(-2).every((k) => k === kind))
+  );
+  history.push(kind);
+  if (history.length > 2) history.shift();
+  const dir = Math.random() < 0.3 ? -1 : 1;
+  if (kind === "small") return [{ h: rnd(0.14, 0.2), spin: 0, A: 120, settle: 240 }];
+  if (kind === "double")
+    return [{ h: rnd(0.12, 0.16), spin: 0, A: 130, settle: 0 }, { h: rnd(0.4, 0.46), spin: 360 * dir, A: 70 }];
+  return [{ h: rnd(0.32, 0.44), spin: 360 * dir }];
+}
+
+export function SplitLogo({ href = "#idag" }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const logo = ref.current;
+    if (!logo) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !logo.animate) { logo.classList.remove("pre"); return; }
+
+    let busy = true, timer, alive = true;
+    const history = [];
+    const done = () => { clearAnims(logo); busy = false; };
+    const sequence = async (seq) => {
+      if (busy) return;
+      busy = true;
+      try { for (const opts of seq) await logoHop(logo, opts); } catch {}
+      if (alive) done();
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (!document.hidden) sequence(pickHop(history));
+        schedule();
+      }, rnd(6000, 11000));
+    };
+    // Aktivitet utsetter neste hopp – den hopper ikke mens du holder på
+    const nudge = () => { if (timer) schedule(); };
+    const tap = () => { sequence([{}]); schedule(); };
+    const events = ["scroll", "pointerdown", "keydown"];
+    events.forEach((ev) => window.addEventListener(ev, nudge, { passive: true }));
+    logo.addEventListener("click", tap);
+
+    const start = () => {
+      if (!alive) return;
+      const p = logoIntro(logo);
+      requestAnimationFrame(() => logo.classList.remove("pre"));
+      p.then(() => { if (alive) { done(); schedule(); } }).catch(() => {});
+    };
+    (document.fonts?.ready ?? Promise.resolve()).then(start);
+
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, nudge));
+      logo.removeEventListener("click", tap);
+      clearAnims(logo);
+    };
+  }, []);
+
+  return (
+    <a ref={ref} href={href} className="logo pre" aria-label="split – til toppen">
+      <span aria-hidden>s</span>
+      <span aria-hidden>p</span>
+      <span className="lc" aria-hidden>l</span>
+      <span className="li" aria-hidden>
+        <span className="lii">i</span>
+        <i className="ldot" />
+      </span>
+      <span className="lc" aria-hidden>t</span>
+    </a>
+  );
+}
